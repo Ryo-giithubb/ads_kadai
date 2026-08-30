@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卒業制作｜実寸パンチングスタジオ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fbfbfa;--card:#fff;--ink:#1c1c1c;
+  --t2:rgba(20,20,20,.56);--t3:rgba(20,20,20,.34);
+  --line:rgba(20,20,20,.09);--line2:rgba(20,20,20,.15);
+  --accent:#2e76ab;--accent-bg:rgba(46,118,171,.08);
+  --green:#1a7a58;--green-bg:rgba(26,122,88,.09);
+  --red:#c0304a;--red-bg:rgba(192,48,74,.07);
+  --gold:#b06800;--gold-bg:rgba(176,104,0,.09);
+  --dark:#1e2328;
+}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,"Hiragino Sans","Noto Sans JP",sans-serif;line-height:1.75;padding:40px 20px}
+.wrap{max-width:980px;margin:0 auto}
+
+.hero{background:var(--dark);border-radius:18px;padding:48px 40px;margin-bottom:48px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,rgba(46,118,171,.25) 0%,transparent 60%)}
+.hero-eyebrow{display:inline-block;background:rgba(46,118,171,.25);color:#7ab8e8;font-size:.7rem;font-weight:700;letter-spacing:.1em;padding:3px 12px;border-radius:20px;margin-bottom:16px}
+.hero h1{font-size:clamp(1.6rem,4vw,2.5rem);font-weight:800;color:#fff;line-height:1.2;letter-spacing:-.02em;margin-bottom:10px}
+.hero-sub{color:rgba(255,255,255,.6);font-size:.92rem;margin-bottom:24px;max-width:52ch}
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px}
+.hchip{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:5px 11px;font-size:.76rem;color:rgba(255,255,255,.75);font-weight:500}
+
+.sec{margin-bottom:52px}
+.sec-label{font-size:.7rem;font-weight:700;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:6px;margin-bottom:18px}
+.sec-label::before{content:'';display:inline-block;width:3px;height:14px;background:var(--accent);border-radius:2px}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:560px){.stats{grid-template-columns:1fr}}
+.stat{background:var(--card);border:1px solid var(--line2);border-radius:14px;padding:22px 20px;text-align:center}
+.stat-val{font-size:2.2rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+.stat-unit{font-size:1rem;font-weight:600;margin-left:2px}
+.stat-label{font-size:.78rem;color:var(--t2);margin-top:6px}
+.stat.blue .stat-val{color:var(--accent)}
+.stat.green .stat-val{color:var(--green)}
+.stat.gold .stat-val{color:var(--gold)}
+
+.problems{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:560px){.problems{grid-template-columns:1fr}}
+.prob{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.prob-top{background:var(--gold);padding:10px 14px}
+.prob-top h3{font-size:.82rem;font-weight:700;color:#fff}
+.prob-body{padding:14px;font-size:.8rem;color:var(--t2);line-height:1.65}
+
+.flow-wrap{background:var(--card);border:1px solid var(--line2);border-radius:14px;padding:24px;margin-bottom:14px}
+.flow-title{font-size:.78rem;font-weight:700;margin-bottom:16px;color:var(--t2);letter-spacing:.04em}
+.flow{display:flex;align-items:flex-start;gap:0;overflow-x:auto}
+.flow-step{flex:1;min-width:0;text-align:center;padding:10px 6px;position:relative}
+.flow-step:not(:last-child)::after{content:"→";position:absolute;right:-8px;top:22px;color:var(--t3);font-size:1rem}
+.fs-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;margin:0 auto 7px}
+.fs-label{font-size:.72rem;font-weight:600;color:var(--ink);line-height:1.4}
+.fs-sub{font-size:.62rem;color:var(--t2);margin-top:3px;line-height:1.4}
+.before-flow .fs-num{background:var(--red-bg);color:var(--red)}
+.after-flow .fs-num{background:var(--green-bg);color:var(--green)}
+
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:560px){.features{grid-template-columns:1fr}}
+.feat{background:var(--dark);border-radius:14px;padding:22px}
+.feat-badge{display:inline-block;background:rgba(46,118,171,.3);color:#7ab8e8;font-size:.65rem;font-weight:700;padding:2px 9px;border-radius:8px;letter-spacing:.06em;margin-bottom:10px}
+.feat h3{font-size:.95rem;font-weight:700;color:#fff;margin-bottom:8px}
+.feat p{font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.65}
+.feat-list{list-style:none;margin-top:8px}
+.feat-list li{font-size:.74rem;color:rgba(255,255,255,.5);padding:3px 0;padding-left:10px;position:relative}
+.feat-list li::before{content:"·";position:absolute;left:0;color:#7ab8e8}
+
+.mockup-wrap{background:var(--card);border:1px solid var(--line2);border-radius:16px;overflow:hidden;box-shadow:0 12px 40px -20px rgba(0,0,0,.2);margin-bottom:14px}
+.mock-bar{background:#e8e8e8;height:32px;display:flex;align-items:center;padding:0 14px;gap:6px}
+.dot{width:11px;height:11px;border-radius:50%}
+.dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+.mock-url{flex:1;background:#fff;border-radius:4px;height:20px;margin:0 12px;display:flex;align-items:center;padding:0 8px;font-size:.68rem;color:var(--t2);font-family:monospace}
+.mock-body{padding:20px 24px}
+.mock-title{font-size:1rem;font-weight:800;margin-bottom:4px}
+.mock-desc{font-size:.75rem;color:var(--t2);margin-bottom:16px}
+.mock-grid{display:grid;grid-template-columns:220px 1fr;gap:16px}
+@media(max-width:580px){.mock-grid{grid-template-columns:1fr}}
+.mock-controls{background:var(--bg);border-radius:10px;padding:14px}
+.ctrl-group{margin-bottom:12px}
+.ctrl-label{font-size:.65rem;color:var(--t2);font-weight:600;margin-bottom:6px;letter-spacing:.04em}
+.ctrl-btns{display:flex;flex-wrap:wrap;gap:4px}
+.ctrl-btn{font-size:.65rem;padding:4px 8px;border-radius:5px;background:var(--card);border:1px solid var(--line2);color:var(--ink)}
+.ctrl-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ctrl-slider{display:flex;align-items:center;gap:8px;font-size:.68rem}
+.ctrl-slider span{color:var(--t2)}
+.ctrl-range{flex:1;height:3px;background:var(--accent);border-radius:2px}
+.mock-preview{background:#1a1a1a;border-radius:10px;display:flex;align-items:center;justify-content:center;min-height:150px;position:relative;overflow:hidden}
+.mock-stats-row{display:flex;gap:8px;margin-top:10px}
+.mock-stat{flex:1;background:var(--accent-bg);border-radius:8px;padding:8px;text-align:center;font-size:.68rem}
+.mock-stat .v{font-size:.95rem;font-weight:700;color:var(--accent)}
+.mock-btns{display:flex;gap:6px;margin-top:10px}
+.mock-export{padding:6px 12px;border-radius:6px;font-size:.7rem;font-weight:600}
+.mock-export.svg{background:var(--accent);color:#fff}
+.mock-export.dxf{background:var(--green-bg);color:var(--green);border:1px solid var(--green)}
+
+.results{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:560px){.results{grid-template-columns:1fr}}
+.result{border-radius:14px;padding:24px;text-align:center}
+.result.r1{background:var(--accent-bg);border:1px solid rgba(46,118,171,.2)}
+.result.r2{background:var(--green-bg);border:1px solid rgba(26,122,88,.2)}
+.result.r3{background:var(--gold-bg);border:1px solid rgba(176,104,0,.2)}
+.result-val{font-size:2.4rem;font-weight:800;line-height:1;letter-spacing:-.03em}
+.r1 .result-val{color:var(--accent)}
+.r2 .result-val{color:var(--green)}
+.r3 .result-val{color:var(--gold)}
+.result-label{font-size:.8rem;font-weight:600;margin-top:6px}
+.result-sub{font-size:.72rem;color:var(--t2);margin-top:4px}
+
+.learns{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.learns{grid-template-columns:1fr}}
+.learn{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.learn.good{border-top:3px solid var(--green)}
+.learn.bad{border-top:3px solid var(--red)}
+.learn-tag{font-size:.67rem;font-weight:700;letter-spacing:.05em;margin-bottom:7px}
+.good .learn-tag{color:var(--green)}
+.bad .learn-tag{color:var(--red)}
+.learn h3{font-size:.88rem;font-weight:700;margin-bottom:6px}
+.learn p{font-size:.78rem;color:var(--t2);line-height:1.65}
+
+.quote-block{background:var(--dark);border-radius:16px;padding:40px;text-align:center;margin-bottom:52px}
+.quote-text{font-size:clamp(1rem,2.5vw,1.4rem);font-weight:700;color:#fff;line-height:1.75;letter-spacing:-.01em;max-width:40ch;margin:0 auto}
+.quote-em{color:#7ab8e8}
+.quote-attr{margin-top:16px;font-size:.78rem;color:rgba(255,255,255,.4)}
+
+footer{text-align:center;margin-top:52px;font-size:.75rem;color:var(--t3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">AI Driven School｜卒業制作</div>
+    <h1>実寸パンチングスタジオ</h1>
+    <p class="hero-sub">パンチングメタルの孔パターンをブラウザ上で1:1実寸プレビュー・DXF出力できるツール。Claude Codeで開発し、設計プロセスの課題をAIで解決した。</p>
+    <div class="hero-chips">
+      <span class="hchip">👤 小野良介｜COLORFUL昱景設計</span>
+      <span class="hchip">💻 Claude Code で開発</span>
+      <span class="hchip">🏗 内装設計事務所の実務で使用中</span>
+    </div>
+  </div>
+
+  <!-- 実績 -->
+  <div class="sec">
+    <div class="sec-label">これまでの実績</div>
+    <div class="stats">
+      <div class="stat blue">
+        <div class="stat-val">12<span class="stat-unit">+</span></div>
+        <div class="stat-label">このツールで完成したプロジェクト数</div>
+      </div>
+      <div class="stat green">
+        <div class="stat-val">30<span class="stat-unit">種</span></div>
+        <div class="stat-label">対応パターン数（丸・角・楕円・三角・六角）</div>
+      </div>
+      <div class="stat gold">
+        <div class="stat-val">±0.1<span class="stat-unit">mm</span></div>
+        <div class="stat-label">CNC出力の寸法精度</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Before 課題 -->
+  <div class="sec">
+    <div class="sec-label">Before｜従来の実寸検討プロセスの課題</div>
+    <div class="problems">
+      <div class="prob">
+        <div class="prob-top"><h3>1. 図面・CGを作成</h3></div>
+        <div class="prob-body">まず設計図面を書き、CGパースを作成。手すり・スクリーンなどパンチングメタルを使う部位は図面だけでは実際の透け感がわからない。</div>
+      </div>
+      <div class="prob">
+        <div class="prob-top"><h3>2. 1:1で印刷して確認</h3></div>
+        <div class="prob-body">実寸感を確認するためにA0・A1用紙に1:1で印刷。コストと手間がかかり、変更のたびに再印刷が必要だった。</div>
+      </div>
+      <div class="prob">
+        <div class="prob-top"><h3>3. 透けすぎて大失敗…</h3></div>
+        <div class="prob-body">実寸サンプルを作ってはじめて「透けすぎた」と気づく。確認が遅すぎてやり直しが発生。時間・コスト両面で大きなロスになっていた。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Before フロー -->
+  <div class="sec">
+    <div class="sec-label">Before フロー</div>
+    <div class="flow-wrap before-flow">
+      <div class="flow-title">▼ 従来プロセス（確認が遅く、失敗コストが高い）</div>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="fs-num">1</div>
+          <div class="fs-label">図面作成</div>
+          <div class="fs-sub">AutoCADで<br>手動作図</div>
+        </div>
+        <div class="flow-step">
+          <div class="fs-num">2</div>
+          <div class="fs-label">CG作成</div>
+          <div class="fs-sub">3Dパースで<br>イメージ確認</div>
+        </div>
+        <div class="flow-step">
+          <div class="fs-num">3</div>
+          <div class="fs-label">1:1印刷</div>
+          <div class="fs-sub">A0用紙に<br>実寸印刷</div>
+        </div>
+        <div class="flow-step">
+          <div class="fs-num">4</div>
+          <div class="fs-label">実寸確認</div>
+          <div class="fs-sub">印刷物を壁に<br>当てて確認</div>
+        </div>
+        <div class="flow-step">
+          <div class="fs-num">5</div>
+          <div class="fs-label">失敗発覚</div>
+          <div class="fs-sub">透けすぎ・<br>重すぎが判明</div>
+        </div>
+        <div class="flow-step">
+          <div class="fs-num">6</div>
+          <div class="fs-label">最初から<br>やり直し</div>
+          <div class="fs-sub">時間・コスト<br>の無駄が発生</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ツール機能 -->
+  <div class="sec">
+    <div class="sec-label">実寸パンチングスタジオ｜機能紹介</div>
+    <div class="features">
+      <div class="feat">
+        <span class="feat-badge">AUTO</span>
+        <h3>リアルタイム自動生成</h3>
+        <p>孔径・ピッチ・配列を入力すると即座にパターンを生成。手動製図ゼロ。</p>
+        <ul class="feat-list">
+          <li>丸・角・楕円・三角・六角の5形状</li>
+          <li>60°千鳥・45°斜め・直列配列</li>
+          <li>開孔率をリアルタイム計算</li>
+        </ul>
+      </div>
+      <div class="feat">
+        <span class="feat-badge">1:1</span>
+        <h3>実寸1:1プレビュー</h3>
+        <p>モニターを定規で校正すれば画面上で実物と同じ大きさを確認できる。印刷不要。</p>
+        <ul class="feat-list">
+          <li>物理DPI校正機能（端末に記憶）</li>
+          <li>遠望効果シミュレーション</li>
+          <li>観察距離・倍率をリアルタイム調整</li>
+        </ul>
+      </div>
+      <div class="feat">
+        <span class="feat-badge">CNC</span>
+        <h3>SVG / DXF書き出し</h3>
+        <p>確認OKそのままSVGまたはDXFで書き出し。工場への提出データが即完成。</p>
+        <ul class="feat-list">
+          <li>SVG書き出し（プレゼン・Web用）</li>
+          <li>DXF書き出し（CNC加工・CAD用）</li>
+          <li>DWGとして保存可能</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ツール画面 -->
+  <div class="sec">
+    <div class="sec-label">ツール画面</div>
+    <div class="mockup-wrap">
+      <div class="mock-bar">
+        <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+        <div class="mock-url">punching-studio-ja.html　— 実寸パンチングスタジオ</div>
+      </div>
+      <div class="mock-body">
+        <div class="mock-title">実寸パンチングスタジオ</div>
+        <div class="mock-desc">孔径・ピッチ・配列を入力すると、画面上に実物大(1:1)でパターンを表示します</div>
+        <div class="mock-grid">
+          <div class="mock-controls">
+            <div class="ctrl-group">
+              <div class="ctrl-label">孔形状</div>
+              <div class="ctrl-btns">
+                <span class="ctrl-btn active">丸孔</span>
+                <span class="ctrl-btn">角孔</span>
+                <span class="ctrl-btn">楕円</span>
+                <span class="ctrl-btn">三角</span>
+                <span class="ctrl-btn">六角</span>
+              </div>
+            </div>
+            <div class="ctrl-group">
+              <div class="ctrl-label">配列方式</div>
+              <div class="ctrl-btns">
+                <span class="ctrl-btn active">60°千鳥</span>
+                <span class="ctrl-btn">45°斜め</span>
+                <span class="ctrl-btn">直列</span>
+              </div>
+            </div>
+            <div class="ctrl-group">
+              <div class="ctrl-label">孔径 d　→　6 mm</div>
+              <div class="ctrl-slider"><span>1</span><div class="ctrl-range"></div><span>50</span></div>
+            </div>
+            <div class="ctrl-group">
+              <div class="ctrl-label">ピッチ P　→　18 mm</div>
+              <div class="ctrl-slider"><span>5</span><div class="ctrl-range"></div><span>100</span></div>
+            </div>
+            <div class="ctrl-group">
+              <div class="ctrl-label">ズーム　→　100%（実寸）</div>
+              <div class="ctrl-slider"><span>25%</span><div class="ctrl-range"></div><span>400%</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="mock-preview">
+              <svg width="220" height="150" viewBox="0 0 220 150" style="opacity:.75">
+                <defs><pattern id="pp" x="0" y="0" width="22" height="19" patternUnits="userSpaceOnUse">
+                  <circle cx="11" cy="9.5" r="4.5" fill="none" stroke="rgba(46,118,171,.9)" stroke-width="1.2"/>
+                  <circle cx="0" cy="0" r="4.5" fill="none" stroke="rgba(46,118,171,.9)" stroke-width="1.2"/>
+                  <circle cx="22" cy="0" r="4.5" fill="none" stroke="rgba(46,118,171,.9)" stroke-width="1.2"/>
+                  <circle cx="0" cy="19" r="4.5" fill="none" stroke="rgba(46,118,171,.9)" stroke-width="1.2"/>
+                  <circle cx="22" cy="19" r="4.5" fill="none" stroke="rgba(46,118,171,.9)" stroke-width="1.2"/>
+                </pattern></defs>
+                <rect width="220" height="150" fill="url(#pp)"/>
+              </svg>
+            </div>
+            <div class="mock-stats-row">
+              <div class="mock-stat"><div class="v">23.3%</div>開孔率</div>
+              <div class="mock-stat"><div class="v" style="color:var(--green)">R6 P18</div>仕様</div>
+              <div class="mock-stat"><div class="v" style="color:var(--gold)">±0.1mm</div>精度</div>
+            </div>
+            <div class="mock-btns">
+              <span class="mock-export svg">SVGを書き出す</span>
+              <span class="mock-export dxf">DXFを書き出す</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- After フロー -->
+  <div class="sec">
+    <div class="sec-label">After フロー</div>
+    <div class="flow-wrap after-flow">
+      <div class="flow-title">▼ ツール導入後（その場で確認→即出力）</div>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="fs-num">1</div>
+          <div class="fs-label">仕様入力</div>
+          <div class="fs-sub">スライダーで<br>孔径・ピッチ入力</div>
+        </div>
+        <div class="flow-step">
+          <div class="fs-num">2</div>
+          <div class="fs-label">実寸確認</div>
+          <div class="fs-sub">1:1プレビューで<br>その場で確認</div>
+        </div>
+        <div class="flow-step">
+          <div class="fs-num">3</div>
+          <div class="fs-label">クライアント確認</div>
+          <div class="fs-sub">画面を見せて<br>その場で承認</div>
+        </div>
+        <div class="flow-step">
+          <div class="fs-num">4</div>
+          <div class="fs-label">DXF書き出し</div>
+          <div class="fs-sub">ボタン1つで<br>工場提出データ完成</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 成果 -->
+  <div class="sec">
+    <div class="sec-label">導入後の成果</div>
+    <div class="results">
+      <div class="result r1">
+        <div class="result-val">▼60%</div>
+        <div class="result-label">製図・確認時間の削減</div>
+        <div class="result-sub">印刷・やり直しがゼロに</div>
+      </div>
+      <div class="result r2">
+        <div class="result-val">▲3倍</div>
+        <div class="result-label">提案スピードの向上</div>
+        <div class="result-sub">その場でバリエーション比較が可能に</div>
+      </div>
+      <div class="result r3">
+        <div class="result-val">ゼロ</div>
+        <div class="result-label">寸法ミスによる手戻り</div>
+        <div class="result-sub">DXF直接出力で転記ミスなし</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 学びと失敗 -->
+  <div class="sec">
+    <div class="sec-label">学びと失敗</div>
+    <div class="learns">
+      <div class="learn good">
+        <div class="learn-tag">✅ 得たもの</div>
+        <h3>スタッフが実際に使ってくれた</h3>
+        <p>自分だけでなく事務所のスタッフがこのツールを使い始めた。「本当に嬉しかった」——ツールが仕事の中で生きた瞬間だった。</p>
+      </div>
+      <div class="learn good">
+        <div class="learn-tag">✅ 得たもの</div>
+        <h3>「AIでこれもできるんじゃないか」を探す脳</h3>
+        <p>AIDを受ける前は「プログラミングができない自分にはツールは作れない」と思っていた。問題を定義してAIに渡す力さえあれば、実務で使えるツールが作れることを体感した。</p>
+      </div>
+      <div class="learn bad">
+        <div class="learn-tag">⚠ 失敗｜川の断面ツール</div>
+        <h3>「河川断面レコーダー」——誰が使うんだ</h3>
+        <p>River Walkプロジェクトのために川の断面を記録するツールも作ったが、「誰が使うのか」が曖昧なままだった。問題の定義が甘いと、どれだけ精巧なツールを作っても使われない。</p>
+      </div>
+      <div class="learn good">
+        <div class="learn-tag">✅ 次のステップ</div>
+        <h3>Claude APIで「AI提案機能」を追加したい</h3>
+        <p>現在は入力→プレビュー→出力の流れ。次はAIが「このプロジェクトならこの開孔率が適切」と提案する機能を追加したい。探すクセは続く。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 名言 -->
+  <div class="quote-block">
+    <div class="quote-text">"AIでこれもできるんじゃないかと<br><span class="quote-em">「探すクセ」</span>が身についた"</div>
+    <div class="quote-attr">小野良介｜AI Driven School 卒業制作発表より</div>
+  </div>
+
+  <footer>小野良介｜COLORFUL昱景設計｜AI Driven School 卒業制作｜2026年8月</footer>
+</div>
+</body>
+</html>
