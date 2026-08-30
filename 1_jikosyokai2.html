@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>パーソナル図解スキル — 工夫まとめ</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #fbfbfa;
+    --card: #ffffff;
+    --ink: #1c1c1c;
+    --muted: rgba(20,20,20,.56);
+    --line: rgba(20,20,20,.1);
+    --accent: #2e76ab;
+    --accent-bg: rgba(46,118,171,.09);
+    --green: #1a7a58;
+    --green-bg: rgba(26,122,88,.1);
+    --amber: #b06800;
+    --amber-bg: rgba(176,104,0,.1);
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    line-height: 1.7;
+    padding: 0 20px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 60px 0 80px; }
+
+  .header { margin-bottom: 56px; }
+  .header .label {
+    display: inline-block;
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-size: clamp(24px, 4vw, 38px);
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 10px;
+  }
+  .header p { color: var(--muted); font-size: 15px; }
+
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .concept-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 56px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .concept-step {
+    flex: 1;
+    min-width: 140px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 18px;
+    text-align: center;
+  }
+  .concept-step .num { font-size: 11px; color: var(--accent); font-weight: 700; margin-bottom: 6px; }
+  .concept-step .title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .concept-step .desc { font-size: 12px; color: var(--muted); }
+  .arrow { font-size: 20px; color: var(--accent); padding: 0 4px; flex-shrink: 0; }
+
+  .features { margin-bottom: 56px; }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .feature-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .feature-card .icon { font-size: 22px; margin-bottom: 12px; }
+  .feature-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .feature-card p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+  .feature-card.accent-green { border-top: 3px solid var(--green); }
+  .feature-card.accent-blue  { border-top: 3px solid var(--accent); }
+  .feature-card.accent-amber { border-top: 3px solid var(--amber); }
+
+  .prompt-section { margin-bottom: 56px; }
+  .prompt-box {
+    background: #1c1c1e;
+    border-radius: 14px;
+    padding: 28px;
+  }
+  .prompt-box .prompt-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: rgba(255,255,255,.4);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .prompt-box pre {
+    font-family: "Menlo", "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.75;
+    color: rgba(255,255,255,.88);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .prompt-box .highlight { color: #5bc8f5; }
+  .prompt-box .value     { color: #a8d8a8; }
+
+  .comparison { margin-bottom: 56px; }
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+  .compare-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .compare-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 14px;
+  }
+  .compare-card.before .compare-label { background: rgba(192,48,74,.1); color: #c0304a; }
+  .compare-card.after  .compare-label { background: var(--green-bg); color: var(--green); }
+  .compare-card ul { list-style: none; }
+  .compare-card ul li {
+    font-size: 13px;
+    color: var(--muted);
+    padding: 6px 0 6px 18px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .compare-card ul li:last-child { border-bottom: none; }
+  .compare-card.before ul li::before { content: "✕ "; color: #c0304a; position: absolute; left: 0; }
+  .compare-card.after  ul li::before { content: "✓ "; color: var(--green); position: absolute; left: 0; }
+
+  .learning {
+    background: var(--accent-bg);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 56px;
+  }
+  .learning h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--accent); }
+  .learning ul { list-style: none; }
+  .learning ul li {
+    font-size: 14px;
+    padding: 7px 0 7px 22px;
+    position: relative;
+    border-bottom: 1px solid rgba(46,118,171,.12);
+  }
+  .learning ul li:last-child { border-bottom: none; }
+  .learning ul li::before { content: "→ "; color: var(--accent); position: absolute; left: 0; }
+
+  .footer {
+    border-top: 1px solid var(--line);
+    padding-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .footer .name { font-size: 13px; font-weight: 700; }
+  .footer .meta { font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="label">AID 1ヶ月目課題 ／ Skill Report</div>
+    <h1>パーソナル図解スキル<br>— 工夫まとめ —</h1>
+    <p>小野良介（COLORFUL 昱景設計）が設計した、建築・内装設計業務のための図解生成スキル</p>
+  </div>
+
+  <div class="section-title">このスキルの仕組み</div>
+  <div class="concept-flow">
+    <div class="concept-step">
+      <div class="num">STEP 1</div>
+      <div class="title">情報を入力</div>
+      <div class="desc">目的・内容・読者をテンプレートに記入</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="concept-step">
+      <div class="num">STEP 2</div>
+      <div class="title">AIが生成</div>
+      <div class="desc">固定デザイン要件でHTML図解を自動作成</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="concept-step">
+      <div class="num">STEP 3</div>
+      <div class="title">即共有</div>
+      <div class="desc">1ファイルのHTMLをそのまま送付・公開</div>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="section-title">3つの工夫ポイント</div>
+    <div class="feature-grid">
+      <div class="feature-card accent-blue">
+        <div class="icon">🎨</div>
+        <h3>デザインを固定して迷いをゼロに</h3>
+        <p>背景色・メインカラー・フォント・角丸・余白をスキルに埋め込み固定。毎回AIが勝手にデザインを変えないようにすることで、ブランドの一貫性を担保。</p>
+      </div>
+      <div class="feature-card accent-green">
+        <div class="icon">📱</div>
+        <h3>外部ライブラリなし・1ファイル完結</h3>
+        <p>vanilla HTML + CSS + JS のみ。ライブラリ読み込みエラーがなく、HTMLファイル1つをメールに添付したりDropboxで共有するだけで相手がすぐ見られる。</p>
+      </div>
+      <div class="feature-card accent-amber">
+        <div class="icon">🌏</div>
+        <h3>中国語圏クライアントを想定した設計</h3>
+        <p>読者欄に「中国語圏クライアント」と指定すれば日中バイリンガル対応の図解が出力される。設計事務所の実際の業務フローに即した仕様。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="prompt-section">
+    <div class="section-title">プロンプトテンプレート（抜粋）</div>
+    <div class="prompt-box">
+      <div class="prompt-label">Prompt Template</div>
+      <pre><span class="highlight">【図解の目的】</span>
+<span class="value">クライアントへの概念方案説明</span>
+
+<span class="highlight">【伝えたい内容】</span>
+<span class="value">- パンチングメタルの素材特性
+- 採用プロジェクト実績
+- 南京プロジェクトでの課題と解決</span>
+
+<span class="highlight">【デザイン要件（固定）】</span>
+<span class="value">背景: #fbfbfa ／ アクセント: #2e76ab
+カード型・角丸14px・スマホ対応
+外部ライブラリ不使用・1ファイル完結</span></pre>
+    </div>
+  </div>
+
+  <div class="comparison">
+    <div class="section-title">スキル導入 Before / After</div>
+    <div class="compare-grid">
+      <div class="compare-card before">
+        <div class="compare-label">Before</div>
+        <ul>
+          <li>毎回プロンプトをゼロから書く</li>
+          <li>デザインがバラバラになる</li>
+          <li>何度も修正指示が必要</li>
+          <li>中国語対応を毎回指示し忘れる</li>
+        </ul>
+      </div>
+      <div class="compare-card after">
+        <div class="compare-label">After</div>
+        <ul>
+          <li>テンプレートに埋めるだけ</li>
+          <li>毎回同じブランドデザイン</li>
+          <li>一発でほぼ完成形が出る</li>
+          <li>バイリンガル対応が自動化</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="learning">
+    <h3>スキルを育てる中で気づいたこと</h3>
+    <ul>
+      <li>情報は5個以内に絞ると図解がすっきりする</li>
+      <li>「相手が何を知りたいか」から逆算して項目を選ぶ</li>
+      <li>ドラフトを出させてから手直しする方が圧倒的に速い</li>
+      <li>デザイン要件を固定するとAIが「考えること」に集中できる</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    <div class="name">小野 良介 ／ COLORFUL 昱景設計</div>
+    <div class="meta">AI Driven School ／ 1ヶ月目課題 ／ 2026年</div>
+  </div>
+
+</div>
+</body>
+</html>
