@@ -1,0 +1,2012 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>建築設計事務所 収支ダッシュボード</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#fff;
+      --fill-3:rgba(20,20,20,.04);--fill-4:rgba(20,20,20,.025);
+      --s1:rgba(20,20,20,.18);--s2:rgba(20,20,20,.1);
+      --t1:rgba(20,20,20,.88);--t2:rgba(20,20,20,.54);--t3:rgba(20,20,20,.35);
+      --accent:#2e76ab;--green:#1a7a58;--red:#c0304a;
+      --green-bg:rgba(26,122,88,.1);--red-bg:rgba(192,48,74,.08);
+      --green-bar:#1f8a65;--red-bar:#e05575;
+    }
+    body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Segoe UI",sans-serif;font-size:14px;line-height:1.5}
+    .page{max-width:1540px;margin:0 auto;padding:24px 28px}
+
+    /* mode */
+    .mode-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-radius:7px;margin-bottom:18px;font-size:13px;font-weight:500}
+    .mode-bar.staff{background:rgba(46,118,171,.1);border:1px solid rgba(46,118,171,.3);color:#2e76ab}
+    .mode-bar.admin{background:rgba(26,122,88,.1);border:1px solid rgba(26,122,88,.3);color:#1a7a58}
+    .mode-btn{padding:5px 14px;border-radius:5px;border:none;cursor:pointer;font-size:12px;font-weight:500}
+    .mode-bar.staff .mode-btn{background:#2e76ab;color:#fff}
+    .mode-bar.admin .mode-btn{background:#1a7a58;color:#fff}
+
+    /* header */
+    .header{display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+    .header h1{font-size:22px;font-weight:700;flex:1}
+    .header .sub{font-size:12px;color:var(--t2)}
+    .yr-row{display:flex;align-items:center;gap:6px}
+    select,.yr-select{background:#fff;border:1px solid var(--s1);color:var(--t1);padding:5px 10px;border-radius:5px;font-size:13px;cursor:pointer;outline:none}
+    select:focus,.yr-select:focus{border-color:var(--accent)}
+    .icon-btn{width:28px;height:28px;border-radius:5px;border:1px solid var(--s1);background:#fff;color:var(--t2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .icon-btn:hover{background:var(--fill-3)}
+    .yr-add-input{width:70px;padding:5px 8px;border:1px solid var(--accent);border-radius:5px;font-size:13px;outline:none}
+
+    /* summary */
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+    .stat-card{border:1px solid var(--s2);border-radius:8px;padding:13px 16px}
+    .stat-value{font-size:19px;font-weight:590}
+    .stat-label{font-size:11px;color:var(--t2);margin-top:3px}
+    .stat-sub{font-size:11px;color:var(--t3);margin-top:2px}
+    .stat-card.green .stat-value{color:var(--green)}
+    .stat-card.red   .stat-value{color:var(--red)}
+    .stat-card.blue  .stat-value{color:var(--accent)}
+    .ovhd-row{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;color:var(--t2)}
+
+    .divider{border:none;border-top:1px solid var(--s2);margin:22px 0}
+    h2{font-size:16px;font-weight:590;margin-bottom:12px}
+
+    /* table */
+    .tbl-wrap{overflow-x:auto}
+    table{border-collapse:collapse;width:100%;table-layout:fixed}
+    col.c-proj{width:33.33%}
+    col.c-in  {width:33.33%}
+    col.c-out {width:33.34%}
+    th{padding:7px 12px;font-size:11px;font-weight:600;color:var(--t1);text-align:left;border-bottom:2px solid var(--s1);white-space:nowrap;vertical-align:bottom}
+    th.in-bg{background:var(--green-bg)}
+    th.out-bg{background:var(--red-bg)}
+    th.bl{border-left:2px solid var(--s1)}
+    td{padding:10px 12px;border-bottom:1px solid var(--s2);font-size:13px;vertical-align:top;word-break:break-word}
+    td.bl{border-left:2px solid var(--s1)}
+    tr.odd td{background:var(--fill-4)}
+    /* strong row separator */
+    tbody tr td{border-top:2px solid var(--s1)}
+    tbody tr:first-child td{border-top:none}
+
+    /* inputs */
+    input[type=number],input[type=text].ipt{background:#fff;border:1px solid var(--s1);color:var(--t1);padding:3px 7px;border-radius:4px;font-size:12px;outline:none}
+    input[type=number]{-moz-appearance:textfield;text-align:right}
+    input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+    input:focus{border-color:var(--accent)}
+    input[type=checkbox]{width:14px;height:14px;accent-color:var(--green-bar);cursor:pointer;vertical-align:middle}
+    .ipt-u{font-size:11px;color:var(--t3);margin-left:2px}
+    .note-ipt{width:100%;font-size:11px;color:var(--t2);padding:3px 6px;border-radius:4px;background:var(--fill-3);border:1px solid transparent;outline:none;margin-top:4px}
+    .note-ipt:focus{background:#fff;border-color:var(--accent)}
+
+    /* pane 1 */
+    .p1-cell{min-width:200px}
+    .proj-line{display:flex;align-items:baseline;gap:6px;margin-bottom:5px}
+    .proj-no-ipt,.proj-name-ipt{background:transparent;border:none;border-bottom:1px solid var(--s2);color:var(--t1);outline:none;padding:1px 0}
+    .proj-no-ipt{width:72px;font-family:monospace;font-size:11px;letter-spacing:.5px;color:var(--t2)}
+    .proj-name-ipt{flex:1;min-width:110px;font-size:16px;font-weight:700;color:var(--t1)}
+    .proj-no-ipt:focus,.proj-name-ipt:focus{border-bottom-color:var(--accent)}
+    .proj-collapsed-row{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;flex-wrap:wrap}
+    .proj-collapsed-row:hover{background:var(--fill-3)}
+    .mini-box{background:var(--fill-3);border-radius:5px;padding:7px 10px;margin-top:6px;font-size:12px}
+    .mini-row{display:flex;justify-content:space-between;gap:8px;padding:2px 0}
+    .mini-lbl{color:var(--t2)}
+    .mini-val{font-weight:600}
+    .mini-val.green{color:var(--green)}.mini-val.red{color:var(--red)}.mini-val.blue{color:var(--accent)}
+    .mini-hr{border:none;border-top:1px solid var(--s2);margin:4px 0}
+
+    /* pill */
+    .pill{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:500}
+    .pill-neutral{background:var(--fill-3);color:var(--t2)}
+    .pill-success{background:rgba(26,122,88,.13);color:var(--green)}
+    .pill-warning{background:rgba(176,104,0,.13);color:#b06800}
+    .pill-danger{background:rgba(192,48,74,.1);color:var(--red)}
+
+    /* design fee table */
+    .df-table{width:100%;border-collapse:collapse;font-size:11px;margin:6px 0;table-layout:fixed}
+    .df-table colgroup .df-c1{width:40%}
+    .df-table colgroup .df-c2{width:17%}
+    .df-table colgroup .df-c3{width:17%}
+    .df-table colgroup .df-c4{width:20%}
+    .df-table colgroup .df-c5{width:6%}
+    .df-table th{background:var(--fill-3);color:var(--t2);font-weight:600;padding:3px 6px;text-align:right;white-space:nowrap;overflow:hidden}
+    .df-table th:first-child{text-align:left}
+    .df-table td{padding:3px 6px;border-bottom:1px solid var(--s2);text-align:right;vertical-align:middle;overflow:hidden}
+    .df-table td:first-child{text-align:left}
+    .df-table input{width:100%;box-sizing:border-box}
+    .df-total{display:flex;justify-content:space-between;align-items:center;padding:5px 6px;background:rgba(46,118,171,.12);border-radius:4px;font-size:12px;font-weight:600;border:1px solid rgba(46,118,171,.25)}
+
+    /* pane 2 */
+    .p2-cell{min-width:290px}
+    .ck-label{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer;margin-right:10px}
+    .contract-row{display:flex;align-items:center;gap:6px;padding:7px 0 9px;border-bottom:1px solid var(--s2);margin-bottom:9px}
+    .pct-badge{font-size:11px;color:var(--accent);background:rgba(46,118,171,.1);padding:1px 6px;border-radius:3px;margin-left:3px}
+    .pay-block{border:1px solid var(--s2);border-radius:5px;padding:8px 10px;margin-bottom:7px;background:#fff}
+    .pay-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+    .pay-title{font-size:11px;font-weight:600;color:var(--t2)}
+    .pay-amt-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+    .add-btn{display:inline-flex;align-items:center;gap:3px;background:none;border:1px dashed var(--s1);color:var(--t3);font-size:11px;padding:3px 8px;border-radius:4px;cursor:pointer;margin-top:4px}
+    .add-btn:hover{background:var(--fill-3);color:var(--t2)}
+    .in-total{font-size:12px;color:var(--t2);margin-top:7px;padding-top:6px;border-top:1px solid var(--s2)}
+    .in-total b{color:var(--green-bar)}
+
+    /* pane 3 */
+    .p3-cell{min-width:260px}
+    .sd-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+    .staff-sel{background:#fff;border:1px solid var(--s1);color:var(--t1);padding:3px 6px;border-radius:4px;font-size:12px;outline:none;max-width:90px}
+    .staff-sel:focus{border-color:var(--accent)}
+    .cost-lbl{font-size:11px;font-weight:500;color:var(--t1);white-space:nowrap}
+    .out-total{font-size:12px;color:var(--t2);margin-top:7px;padding-top:6px;border-top:1px solid var(--s2);line-height:1.8}
+    .out-total b{color:var(--red-bar)}
+
+    .add-row-btn{width:100%;margin-top:10px;padding:9px;background:#fff;border:1px dashed var(--s1);color:var(--t2);font-size:13px;border-radius:6px;cursor:pointer}
+    .add-row-btn:hover{background:var(--fill-3)}
+
+    /* staff section */
+    .staff-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    @media(max-width:900px){.staff-grid{grid-template-columns:repeat(2,1fr)}}
+    .sc{border:1px solid var(--s2);border-radius:8px;padding:14px}
+    .sc-name-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+    .sc-name-ipt{background:transparent;border:none;border-bottom:1px solid var(--s2);color:var(--t1);font-size:14px;font-weight:600;width:80px;outline:none;padding:2px 0}
+    .sc-name-ipt:focus{border-bottom-color:var(--accent)}
+    .sc-fields{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-bottom:10px;font-size:12px}
+    .sc-field{display:flex;flex-direction:column;gap:2px}
+    .sc-field label{font-size:10px;color:var(--t2)}
+    .sc-computed{background:var(--fill-3);border-radius:5px;padding:7px 10px;font-size:11px;margin-bottom:8px;line-height:1.9}
+    .sc-computed .r{display:flex;justify-content:space-between}
+    .sc-computed b{color:var(--t1);font-weight:600}
+    .chart-wrap{position:relative;height:140px;margin-top:4px}
+    .no-data{text-align:center;color:var(--t3);font-size:12px;padding:28px 0}
+
+    /* charts */
+    .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+    .ch{position:relative;height:230px}
+    .footer-note{text-align:right;font-size:12px;color:var(--t3);margin-top:12px}
+
+    /* print */
+    .print-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:5px;border:1px solid var(--s1);background:#fff;color:var(--t2);font-size:12px;cursor:pointer;font-weight:500}
+    .print-btn:hover{background:var(--fill-3)}
+    .save-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 18px;border-radius:5px;border:none;background:var(--green);color:#fff;font-size:13px;cursor:pointer;font-weight:600;transition:opacity .15s}
+    .save-btn:hover{opacity:.85}
+    .save-btn.flash{background:#0a5c3f}
+    .save-bar{display:flex;align-items:center;gap:10px;padding:7px 16px;border-radius:7px;font-size:12px;margin-bottom:12px}
+    .save-bar.saved{background:rgba(26,122,88,.09);border:1px solid rgba(26,122,88,.25);color:var(--green)}
+    .save-bar.unsaved{background:rgba(176,104,0,.07);border:1px solid rgba(176,104,0,.25);color:#8a6000}
+    @media print{
+      @page{size:A4;margin:12mm 14mm}
+      body{font-size:11px}
+      .page{max-width:none;padding:0}
+      .mode-bar,.print-btn,.save-btn,.icon-btn,.add-btn,.add-row-btn,.overlay{display:none!important}
+      .save-bar{border:1px solid #ccc!important;background:#f9f9f9!important;color:#333!important}
+      .stat-card{break-inside:avoid}
+      .charts-grid,.no-print{display:none!important}
+      table{page-break-inside:auto}
+      tr{page-break-inside:avoid;break-inside:avoid}
+      .tbl-wrap{overflow:visible}
+      th,td{padding:5px 8px!important;font-size:10px!important}
+      .mini-box{font-size:10px!important}
+      .pay-block{padding:5px 7px!important;margin-bottom:4px!important}
+      .sd-row{margin-bottom:3px!important}
+      input[type=number],input[type=text].ipt,input[type=date],.yr-select,select,.staff-sel{
+        border:none!important;background:transparent!important;pointer-events:none;padding:0!important
+      }
+      input[type=checkbox]{pointer-events:none}
+      .sc,.staff-grid,.staff-section{display:none!important}
+      h2.staff-h2{display:none!important}
+      .footer-note{display:none}
+    }
+
+    /* modal */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:100}
+    .mbox{background:#fff;border-radius:10px;padding:30px 34px;width:310px;border:1px solid var(--s1)}
+    .mbox h3{font-size:15px;font-weight:600;margin-bottom:7px}
+    .mbox p{font-size:13px;color:var(--t2);margin-bottom:18px}
+    .mbox input[type=password]{width:100%;padding:8px 10px;border:1px solid var(--s1);border-radius:5px;font-size:15px;outline:none;letter-spacing:4px;margin-bottom:6px}
+    .mbox input[type=password]:focus{border-color:var(--accent)}
+    .merr{font-size:12px;color:var(--red);min-height:16px;margin-bottom:10px}
+    .macts{display:flex;gap:8px;justify-content:flex-end}
+    .macts button{padding:7px 16px;border-radius:5px;font-size:13px;cursor:pointer;border:1px solid var(--s1)}
+    .bp{background:var(--accent);color:#fff;border-color:var(--accent)!important}
+    .bc{background:#fff;color:var(--t1)}
+  </style>
+</head>
+<body><div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef} = React;
+let STD_DAYS=261; // overwritten each render by data.stdDaysYear
+const UNIT=20; // points per day (20pt = 1日)
+
+// ── helpers ────────────────────────────────────────────────────────────────
+const fmtM=n=>{const v=Math.round(Number(n)||0);return v?'¥'+v.toLocaleString('en-US'):'—';};
+const pctStr=(a,t)=>(!t||!a)?'':((a/t)*100).toFixed(1)+'%';
+
+const QUARTERS=['Q1','Q2','Q3','Q4'];
+const Q_DAYS={Q1:65,Q2:65,Q3:65,Q4:66}; // 法定工作日 per quarter (total 261)
+const Q_MONTHS={Q1:[1,2,3],Q2:[4,5,6],Q3:[7,8,9],Q4:[10,11,12]};
+
+function dateToQ(dateStr){
+  if(!dateStr)return null;
+  const m=parseInt((dateStr||'').split('-')[1]);
+  if(m<=3)return'Q1'; if(m<=6)return'Q2'; if(m<=9)return'Q3'; return'Q4';
+}
+// Q ごとの今年の消化営業日数（月〜金）を自動計算
+function calcConsumedDays(q){
+  const today=new Date();
+  const y=today.getFullYear();
+  const ranges={Q1:[1,1,3,31],Q2:[4,1,6,30],Q3:[7,1,9,30],Q4:[10,1,12,31]};
+  const [sm,sd,em,ed]=ranges[q];
+  const start=new Date(y,sm-1,sd);
+  const end  =new Date(y,em-1,ed);
+  if(today<start)return 0;
+  const limit=today<end?today:end;
+  let count=0;
+  const d=new Date(start);
+  while(d<=limit){const dw=d.getDay();if(dw!==0&&dw!==6)count++;d.setDate(d.getDate()+1);}
+  return count;
+}
+// weekDate があれば日付から、なければ旧 quarter フィールドを使う（後方互換）
+function sdToQ(sd){return sd.weekDate?dateToQ(sd.weekDate):(sd.quarter||null);}
+const todayStr=()=>new Date().toISOString().slice(0,10);
+
+// 指定した年月（'2026-05' など）に適用される月基本給を返す
+function getSalaryForMonth(s, yearMonth){
+  const periods=(s.salaryPeriods||[]);
+  if(periods.length===0) return s.monthlySalary||0; // 旧データ互換
+  const sorted=[...periods].sort((a,b)=>(a.from||'').localeCompare(b.from||''));
+  if(!yearMonth) return sorted[sorted.length-1]?.amount||0;
+  // yearMonth 以下で最も遅い from を選ぶ
+  const applicable=sorted.filter(p=>(p.from||'')<=yearMonth);
+  if(applicable.length>0) return applicable[applicable.length-1].amount||0;
+  return sorted[0]?.amount||0; // 全て after なら最初の期間
+}
+function payroll(s, yearMonth){
+  const monthly=getSalaryForMonth(s, yearMonth);
+  const base12 =monthly*12;
+  const bonus  =s.bonusAmount||0;
+  const total  =base12+bonus;
+  const reg    =total/STD_DAYS;
+  const ovt    =base12/STD_DAYS;
+  return{base12,bonus,total,reg,ovt,monthly};
+}
+function getDailyRate(s, yearMonth){return payroll(s, yearMonth).reg;}
+// 四半期の代表年月（その Q の日給計算に使用）
+const Q_MIDMONTH={Q1:'-02',Q2:'-05',Q3:'-08',Q4:'-11'};
+let CURRENT_PERIOD='2026'; // App レンダリング時に上書き
+function getDailyRateForQ(s, q){return getDailyRate(s, CURRENT_PERIOD+Q_MIDMONTH[q]);}
+
+// staffDay は {staffId, q1, q2, q3, q4} — 値はポイント(20pt=1日)
+function sdPts(sd){return(sd.q1||0)+(sd.q2||0)+(sd.q3||0)+(sd.q4||0);}
+function sdTotalDays(sd){return sdPts(sd)/UNIT;}
+function ptsToDay(pts){return pts/UNIT;}
+function calcLaborCost(p,staff){
+  return(p.out.staffDays||[]).reduce((a,sd)=>{
+    const s=staff.find(x=>x.id===sd.staffId)||{};
+    // Q 別レートで積算
+    return a+QUARTERS.reduce((s2,q)=>{
+      const days=(sd[q.toLowerCase()]||0)/UNIT;
+      return s2+days*getDailyRateForQ(s,q);
+    },0);
+  },0);
+}
+// 実収額（actualAmount）or incomes.amount
+function calcTotalIn(p){
+  if(p.type==='indirect') return(p.in.incomes||[]).reduce((a,r)=>a+(r.amount||0),0);
+  return(p.in.payments||[]).reduce((a,r)=>a+(r.actualAmount||0),0);
+}
+// 四半期別入金
+function calcInByQ(projects,q){
+  return projects.reduce((s,p)=>{
+    if(p.type==='indirect'){
+      return(p.in.incomes||[]).reduce((a,r)=>{
+        if((r.amount||0)>0&&dateToQ(r.date)===q)a+=r.amount;
+        return a;
+      },s);
+    }
+    return(p.in.payments||[]).reduce((a,r)=>{
+      if((r.actualAmount||0)>0&&dateToQ(r.actualDate)===q)a+=r.actualAmount;
+      return a;
+    },s);
+  },0);
+}
+// 四半期別人件費（Q別レート使用）
+function calcLaborByQ(projects,staff,q){
+  const k=q.toLowerCase();
+  return projects.reduce((s,p)=>s+(p.out.staffDays||[]).reduce((a,sd)=>{
+    const st=staff.find(x=>x.id===sd.staffId)||{};
+    return a+((sd[k]||0)/UNIT)*getDailyRateForQ(st,q);
+  },0),0);
+}
+function calcOverhead(labor,rate){return Math.round(labor*(rate/100));}
+function calcSubcontractCost(p){return(p.out.subcontracts||[]).reduce((a,s)=>a+(s.amount||0),0);}
+function calcSubcontractByQ(projects,q){
+  return projects.reduce((s,p)=>(p.out.subcontracts||[]).reduce((a,sc)=>{
+    if((sc.amount||0)>0&&dateToQ(sc.date)===q)a+=sc.amount;
+    return a;
+  },s),0);
+}
+function calcTotalOut(p,staff,rate){const l=calcLaborCost(p,staff);return l+calcOverhead(l,rate)+calcSubcontractCost(p);}
+// 合同合計（复数协议求和）
+function getContractTotal(p){return(p.in.contracts||[]).reduce((s,c)=>s+(c.amount||0),0);}
+// スタッフ移行: monthlySalary(旧単値) → salaryPeriods(新配列)
+function migrateStaff(s){
+  if(!s.salaryPeriods){
+    return{...s,salaryPeriods:[{from:'',amount:s.monthlySalary||0}]};
+  }
+  return s;
+}
+// データ移行: contractAmount(旧) → contracts(新)、type フラグ追加、incomes 追加
+function migrateProject(p){
+  let q={...p};
+  if(!q.in.contracts){
+    const amt=q.in.contractAmount||0;
+    const{contractAmount:_,...rest}=q.in;
+    q={...q,in:{...rest,contracts:[{label:'契約総額',amount:amt}]}};
+  }
+  if(!q.type)q={...q,type:'design'};
+  if(!q.in.incomes)q={...q,in:{...q.in,incomes:[]}};
+  if(!q.out.subcontracts)q={...q,out:{...q.out,subcontracts:[]}};
+  return q;
+}
+function staffTotalDays(sid,projects){
+  return projects.reduce((a,p)=>{const sd=(p.out.staffDays||[]).find(x=>x.staffId===sid);return a+(sd?.days||0);},0);
+}
+
+
+const SCHOOL_DEMO=true;
+const STORAGE_KEY='arch-school-ja-v2';
+const META_KEY='arch-school-ja-meta';
+const DEMO_PIN='1234';
+const LOCAL_PIN_HASH=btoa(DEMO_PIN);
+
+const NAMES=['佐藤','鈴木','高橋','田中','伊藤','渡辺','山本','中村','小林','加藤'];
+const STAFF_NOTES=['所長・意匠統括','構造設計リーダー','設備担当','若手設計','PM補佐','意匠・プレゼン','実施設計','総務・経理','営業・広報','事務サポート'];
+const INIT_STAFF=NAMES.map((n,i)=>({
+  id:'s'+i,name:n,dept:i<7?'design':'mgmt',
+  salaryPeriods:[{from:'2026-01',amount:[920000,780000,720000,580000,620000,650000,600000,550000,520000,480000][i]}],
+  bonusAmount:[1500000,900000,700000,450000,500000,400000,380000,320000,280000,200000][i],
+  paidLeaveDays:[12,10,10,8,8,10,9,12,10,8][i],
+  contractExpiry:['2027-03-31','2026-12-31','2027-06-30','2027-03-31','2026-09-30','2027-12-31','2027-03-31','2028-03-31','2027-09-30','2026-12-31'][i],
+  notes:STAFF_NOTES[i],
+  lastYearMonthly:[880000,750000,680000,520000,580000,610000,570000,520000,490000,450000][i],
+  lastYearBonus:[1200000,850000,650000,400000,420000,360000,340000,300000,250000,180000][i],
+  lastYearAnnual:0,
+}));
+
+// 工数: 20pt = 1営業日
+function sd(sid,q1,q2,q3,q4,week){
+  return{staffId:sid,q1,q2,q3,q4,weekDate:week||'2026-03-15'};
+}
+function pay(note,amount,actual,date,demand,delivery){
+  return{demandDone:!!demand,deliveryDone:!!delivery,note,amount,actualAmount:actual,actualDate:date||''};
+}
+
+function mkDemoProjects2026(){
+  return[
+    {id:'p101',projectNumber:'260101',name:'青山邸リノベーション',status:'active',type:'design',
+      designFees:[{specialty:'意匠設計',area:185,unitPrice:12500},{specialty:'設備概略',area:185,unitPrice:3200}],
+      in:{contracted:true,negotiating:false,
+        contracts:[{label:'契約総額',amount:19800000},{label:'追加工事',amount:1200000}],
+        payments:[
+          pay('着手金',3960000,3960000,'2026-01-18',true,true),
+          pay('基本設計完了',5940000,5940000,'2026-04-08',true,true),
+          pay('実施設計①',4950000,3300000,'2026-05-10',true,false),
+          pay('実施設計②',4950000,0,'',false,false),
+        ],incomes:[]},
+      out:{staffDays:[
+        sd('s0',100,60,20,0,'2026-02-03'),sd('s1',80,40,0,0,'2026-02-10'),
+        sd('s2',60,40,20,0,'2026-01-20'),sd('s4',40,60,0,0,'2026-03-01'),
+      ],subcontracts:[
+        {label:'構造外注（基本）',amount:950000,date:'2026-03-01'},
+        {label:'ランドスケープ概略',amount:420000,date:'2026-04-15'},
+      ]}},
+    {id:'p102',projectNumber:'260102',name:'市民会館改修 基本設計',status:'negotiating',type:'design',
+      designFees:[{specialty:'コンペ・基本設計',area:3200,unitPrice:8800}],
+      in:{contracted:false,negotiating:true,
+        contracts:[{label:'見込契約額',amount:45000000}],
+        payments:[pay('コンペ参加',0,0,'',false,false)],
+        incomes:[]},
+      out:{staffDays:[
+        sd('s0',40,0,0,0,'2026-03-01'),sd('s3',80,40,0,0,'2026-03-05'),
+        sd('s5',60,20,0,0,'2026-03-10'),sd('s1',20,0,0,0,'2026-04-01'),
+      ],subcontracts:[]}},
+    {id:'p103',projectNumber:'260103',name:'クレアホームズ分譲マンション',status:'active',type:'design',
+      designFees:[{specialty:'実施設計',area:4200,unitPrice:9500}],
+      in:{contracted:true,negotiating:false,
+        contracts:[{label:'契約総額',amount:38500000}],
+        payments:[
+          pay('着手金',7700000,7700000,'2026-02-25',true,true),
+          pay('実施設計中間',11550000,7700000,'2026-05-05',true,true),
+          pay('最終金',19250000,0,'',false,false),
+        ],incomes:[]},
+      out:{staffDays:[
+        sd('s1',120,80,0,0,'2026-02-20'),sd('s2',100,60,0,0,'2026-02-25'),
+        sd('s4',80,80,0,0,'2026-03-01'),sd('s6',60,40,0,0,'2026-03-15'),
+        sd('s0',20,40,0,0,'2026-04-01'),
+      ],subcontracts:[
+        {label:'構造実施設計',amount:2800000,date:'2026-04-01'},
+        {label:'設備実施設計',amount:1900000,date:'2026-04-20'},
+      ]}},
+    {id:'p104',projectNumber:'260104',name:'河川公園 管理棟新築',status:'design-done',type:'design',
+      designFees:[{specialty:'基本・実施設計',area:890,unitPrice:11000}],
+      in:{contracted:true,negotiating:false,
+        contracts:[{label:'契約総額',amount:16800000}],
+        payments:[
+          pay('着手金',3360000,3360000,'2026-01-10',true,true),
+          pay('基本設計完了',5040000,5040000,'2026-03-20',true,true),
+          pay('実施設計完了',8400000,8400000,'2026-05-01',true,true),
+        ],incomes:[]},
+      out:{staffDays:[
+        sd('s3',100,80,20,0,'2026-01-15'),sd('s5',80,60,0,0,'2026-02-01'),
+        sd('s2',40,40,0,0,'2026-02-15'),
+      ],subcontracts:[{label:'外構・照明デザイン',amount:650000,date:'2026-03-10'}]}},
+    {id:'p105',projectNumber:'260105',name:'桜丘保育園 改築計画',status:'reserved',type:'design',
+      designFees:[{specialty:'基本構想',area:650,unitPrice:9000}],
+      in:{contracted:false,negotiating:false,
+        contracts:[{label:'概算見積',amount:8500000}],
+        payments:[],incomes:[]},
+      out:{staffDays:[sd('s5',20,0,0,0,'2026-04-20')],subcontracts:[]}},
+    {id:'p106',projectNumber:'260106',name:'西区集合住宅（実施設計）',status:'active',type:'design',
+      designFees:[{specialty:'実施設計',area:5600,unitPrice:8200}],
+      in:{contracted:true,negotiating:false,
+        contracts:[{label:'契約総額',amount:35200000}],
+        payments:[
+          pay('着手金',7040000,7040000,'2026-03-05',true,true),
+          pay('実施①',10560000,5280000,'2026-05-12',true,false),
+          pay('実施②',10560000,0,'',false,false),
+        ],incomes:[]},
+      out:{staffDays:[
+        sd('s1',60,100,0,0,'2026-03-08'),sd('s2',80,80,0,0,'2026-03-10'),
+        sd('s6',100,60,0,0,'2026-03-12'),sd('s4',40,40,0,0,'2026-04-01'),
+      ],subcontracts:[{label:'構造・設備外注',amount:3200000,date:'2026-04-25'}]}},
+    {id:'p107',projectNumber:'',name:'管理部門（総務・経理）',status:'active',type:'indirect',
+      in:{contracted:false,negotiating:false,contracts:[],payments:[],
+        incomes:[
+          {label:'社内業務・総務',amount:1200000,date:'2026-02-28'},
+          {label:'家賃収入（テナント）',amount:850000,date:'2026-04-01'},
+        ]},
+      out:{staffDays:[sd('s7',120,80,0,0,'2026-02-01'),sd('s9',80,40,0,0,'2026-02-15')],subcontracts:[]}},
+    {id:'p108',projectNumber:'',name:'営業・広報（間接）',status:'active',type:'indirect',
+      in:{contracted:false,negotiating:false,contracts:[],payments:[],
+        incomes:[{label:'紹介料・コンサル',amount:600000,date:'2026-03-18'}]},
+      out:{staffDays:[sd('s8',100,60,0,0,'2026-03-01')],subcontracts:[]}},
+  ];
+}
+
+function mkDemoProjects2025(){
+  return[
+    {id:'p201',projectNumber:'250088',name:'駅前商業施設 実施設計',status:'completed',type:'design',
+      designFees:[{specialty:'実施設計',area:5400,unitPrice:9200}],
+      in:{contracted:true,negotiating:false,
+        contracts:[{label:'契約総額',amount:29500000}],
+        payments:[pay('最終金',29500000,29500000,'2025-11-30',true,true)],
+        incomes:[]},
+      out:{staffDays:[
+        sd('s0',0,0,40,140,'2025-06-01'),sd('s1',0,0,60,120,'2025-06-15'),
+        sd('s2',0,0,80,100,'2025-07-01'),sd('s6',0,0,40,80,'2025-08-01'),
+      ],subcontracts:[{label:'設備外注（完了）',amount:2100000,date:'2025-10-15'}]}},
+    {id:'p202',projectNumber:'250045',name:'オフィスビル 耐震補強設計',status:'completed',type:'design',
+      designFees:[{specialty:'耐震診断・補強',area:2100,unitPrice:7500}],
+      in:{contracted:true,negotiating:false,
+        contracts:[{label:'契約総額',amount:14200000}],
+        payments:[
+          pay('着手金',2840000,2840000,'2025-03-10',true,true),
+          pay('最終金',11360000,11360000,'2025-09-20',true,true),
+        ],incomes:[]},
+      out:{staffDays:[
+        sd('s1',0,80,100,60,'2025-04-01'),sd('s3',0,60,80,40,'2025-04-15'),
+      ],subcontracts:[{label:'構造解析外注',amount:980000,date:'2025-06-01'}]}},
+  ];
+}
+
+const INIT_DATA={
+  overheadRate:40,stdDaysYear:240,retainedFunds:4200000,
+  standardDaysQ:{Q1:0,Q2:0,Q3:0,Q4:0},
+  staff:INIT_STAFF,
+  reportBy:'山田（デモ）',reportDate:'2026-05-19',
+  '2024':[],
+  '2025':mkDemoProjects2025(),
+  '2026':mkDemoProjects2026(),
+};
+
+const S_LABEL={negotiating:'商談中',active:'進行中','design-done':'設計完了',reserved:'商談保留',completed:'完了'};
+const S_PILL={negotiating:'pill-warning',active:'pill-neutral','design-done':'pill-neutral',reserved:'pill-warning',completed:'pill-success'};
+
+const PIE_COLORS=['rgba(46,118,171,.8)','rgba(26,122,88,.8)','rgba(192,48,74,.7)','rgba(176,104,0,.75)','rgba(102,60,180,.75)','rgba(20,150,160,.7)'];
+
+// ── MoneyInput ────────────────────────────────────────────────────────────
+function MoneyInput({value,onChange,style,placeholder}){
+  const fmt=v=>v?Number(v).toLocaleString('en-US'):'';
+  const [txt,setTxt]=useState(fmt(value));
+  const [editing,setEditing]=useState(false);
+  useEffect(()=>{if(!editing)setTxt(fmt(value));},[value,editing]);
+  return(
+    <input type="text" style={{textAlign:'right',...style}}
+      placeholder={placeholder||'0'}
+      value={txt}
+      onFocus={()=>{setEditing(true);setTxt(value?String(value):'');}}
+      onBlur={()=>{
+        const n=Number(txt.replace(/,/g,''));
+        const safe=isNaN(n)?0:n;
+        setTxt(fmt(safe)); setEditing(false); onChange(safe);
+      }}
+      onChange={e=>{
+        const v=e.target.value;
+        if(/^[\d,]*$/.test(v)){
+          setTxt(v);
+          const n=Number(v.replace(/,/g,''));
+          if(!isNaN(n))onChange(n);
+        }
+      }}
+    />
+  );
+}
+
+// 先週の月曜日を返す（月曜に記録するので先週分がデフォルト）
+function lastMonday(){
+  const d=new Date();
+  const day=d.getDay()||7; // 日=0→7に
+  d.setDate(d.getDate()-day-6); // 先週月曜
+  return d.toISOString().slice(0,10);
+}
+const Q_LABEL={Q1:'Q1（1〜3月）',Q2:'Q2（4〜6月）',Q3:'Q3（7〜9月）',Q4:'Q4（10〜12月）'};
+const Q_COLOR={Q1:'var(--accent)',Q2:'var(--green-bar)',Q3:'#c07800',Q4:'var(--red-bar)'};
+
+// ── StaffDayRow ───────────────────────────────────────────────────────────
+function StaffDayRow({sd,si,pId,staff,isAdmin,updSD,removeSD,savedSd}){
+  const [addDate,setAddDate]=useState(lastMonday);
+  const [addVal,setAddVal] =useState('');
+  const s=staff.find(x=>x.id===sd.staffId);
+  const totalCost=sdTotalDays(sd)*getDailyRate(s||{});
+
+  const autoQ=dateToQ(addDate); // 日付から自動判定
+
+  function handleAdd(){
+    const v=Number(addVal);
+    if(!v||!autoQ)return;
+    const k=autoQ.toLowerCase();
+    const newVal=Math.max(0,(sd[k]||0)+v); // 0以下にはならない
+    updSD(pId,si,k,newVal);
+    setAddVal('');
+    // 加算の場合のみ翌週月曜に進める（修正入力では日付を変えない）
+    if(v>0){
+      const d=new Date(addDate);
+      d.setDate(d.getDate()+7);
+      setAddDate(d.toISOString().slice(0,10));
+    }
+  }
+
+  return(
+    <div style={{borderBottom:'1px solid var(--s2)',paddingBottom:6,marginBottom:6}}>
+      {/* 行1: 担当者名 + Q別直接編集 + コスト + 削除 */}
+      <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+        <select className="staff-sel" style={{minWidth:52,maxWidth:72}} value={sd.staffId}
+          onChange={e=>updSD(pId,si,'staffId',e.target.value)}>
+          <option value="">—</option>
+          {staff.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}
+        </select>
+        {/* Q別累計表示（読み取り専用） */}
+        {QUARTERS.map((q,qi)=>{
+          const k=q.toLowerCase(); const pts=sd[k]||0;
+          const savedPts=savedSd?savedSd[k]||0:null;
+          const isNew=savedPts===null?pts>0:pts!==savedPts;
+          return(
+            <React.Fragment key={q}>
+              {qi>0&&<span style={{color:'var(--s2)',fontSize:12}}>|</span>}
+              <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:1}}>
+                <span style={{fontSize:9,fontWeight:700,color:Q_COLOR[q]}}>{q}</span>
+                <div style={{
+                  width:46,textAlign:'center',fontSize:11,padding:'2px 0',borderRadius:4,
+                  background:isNew?'rgba(46,118,171,.13)':'var(--fill-3)',
+                  border:'1px solid '+(isNew?'var(--accent)':'var(--s2)'),
+                  fontWeight:isNew?700:400,
+                  color:isNew?'var(--accent)':'var(--t2)',
+                  userSelect:'none',
+                }}>
+                  {pts||'—'}
+                </div>
+                <span style={{fontSize:9,color:'var(--t3)'}}>{pts?ptsToDay(pts).toFixed(1)+'日':'—'}</span>
+              </div>
+            </React.Fragment>
+          );
+        })}
+        {isAdmin&&totalCost>0&&<span className="cost-lbl" style={{flexShrink:0,marginLeft:4}}>=&nbsp;{fmtM(totalCost)}</span>}
+        <button onClick={()=>removeSD(pId,si)}
+          style={{marginLeft:'auto',background:'none',border:'none',cursor:'pointer',color:'var(--t3)',fontSize:14,lineHeight:1,padding:'0 2px',flexShrink:0}}
+          title="削除">×</button>
+      </div>
+      {/* 行2: 週次積み上げフォーム（日付→Q自動判定） */}
+      <div style={{marginTop:6,paddingLeft:2,borderTop:'1px dashed var(--s2)',paddingTop:5}}>
+        <div style={{display:'flex',alignItems:'center',gap:5,flexWrap:'wrap'}}>
+          <span style={{fontSize:10,color:'var(--t3)',whiteSpace:'nowrap'}}>記録週</span>
+          <input type="date" style={{fontSize:11,padding:'2px 5px',border:'1px solid var(--s1)',borderRadius:4,outline:'none',color:'var(--t1)'}}
+            value={addDate} onChange={e=>setAddDate(e.target.value)}/>
+          {/* 自動判定Q バッジ */}
+          {autoQ
+            ? <span style={{fontSize:10,fontWeight:700,color:Q_COLOR[autoQ],background:autoQ==='Q1'?'rgba(46,118,171,.1)':autoQ==='Q2'?'rgba(26,122,88,.1)':autoQ==='Q3'?'rgba(192,120,0,.1)':'rgba(192,48,74,.1)',padding:'2px 7px',borderRadius:10,whiteSpace:'nowrap'}}>
+                → {Q_LABEL[autoQ]}
+              </span>
+            : <span style={{fontSize:10,color:'var(--red-bar)'}}>日付が無効</span>
+          }
+          <input type="number" style={{width:58}} placeholder="例: 60"
+            value={addVal} onChange={e=>setAddVal(e.target.value)}
+            onKeyDown={e=>e.key==='Enter'&&handleAdd()}/>
+          <span style={{fontSize:10,color:Number(addVal)<0?'var(--red)':'var(--t3)',whiteSpace:'nowrap'}}>
+            {addVal&&Number(addVal)!==0
+              ?(Number(addVal)>0?'+':'')+Number(addVal)+'pt = '+(Number(addVal)<0?'':'')+ptsToDay(Number(addVal)).toFixed(1)+'日'
+              :'20pt=1日 / マイナスで減算可'}
+          </span>
+          <button className="add-btn" style={{padding:'2px 10px',marginTop:0}} onClick={handleAdd}>＋</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── ProductivityBar ───────────────────────────────────────────────────────
+function ProductivityBar({label,value,desc}){
+  // bar width: 1.0× = 20%, 5.0× = 100%, capped at 5×
+  const pct=Math.min(value/5,1)*100;
+  const color=value<1?'var(--red-bar)':value<2?'#c07800':'var(--green-bar)';
+  return(
+    <div style={{marginBottom:6}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',fontSize:11,marginBottom:3}}>
+        <div>
+          <span style={{fontWeight:600,color:'var(--t1)'}}>{label}</span>
+          <span style={{fontSize:10,color:'var(--t3)',marginLeft:5}}>{desc}</span>
+        </div>
+        <span style={{fontWeight:700,color,fontSize:13}}>{value>0?value.toFixed(2)+'×':'—'}</span>
+      </div>
+      <div style={{background:'var(--s2)',borderRadius:4,height:7,position:'relative'}}>
+        <div style={{width:pct+'%',height:'100%',background:color,borderRadius:4,transition:'width .4s'}}/>
+        {/* break-even marker at 20% (=1×) */}
+        <div style={{position:'absolute',left:'20%',top:-2,bottom:-2,width:1.5,background:'rgba(20,20,20,.2)',borderRadius:1}}/>
+      </div>
+      <div style={{fontSize:9,color:'var(--t3)',marginTop:2,textAlign:'right'}}>1× = 损益平衡</div>
+    </div>
+  );
+}
+
+// ── StaffCard ─────────────────────────────────────────────────────────────
+function StaffCard({s,projects,isAdmin,stdDaysQ,upd,del}){
+  const ref=useRef(null);const chart=useRef(null);
+  const slices=projects.map(p=>{
+    const sd=(p.out.staffDays||[]).find(x=>x.staffId===s.id);
+    return{name:p.name,days:sd?sdTotalDays(sd):0};
+  }).filter(x=>x.days>0);
+  const totalDays=slices.reduce((a,x)=>a+x.days,0);
+  // 現在の基本給（最新期間）で payroll 計算
+  const currentYM=CURRENT_PERIOD+'-12'; // 年末を基準に最新給与を使用
+  const pw=payroll(s, currentYM);
+  // per-quarter days for this staff member
+  const qDays=QUARTERS.reduce((o,q)=>{
+    const k=q.toLowerCase();
+    o[q]=projects.reduce((s2,p)=>{
+      const sd=(p.out.staffDays||[]).find(x=>x.staffId===s.id);
+      return s2+(sd?sd[k]||0:0);
+    },0);
+    return o;
+  },{});
+  const overtimeDays=QUARTERS.reduce((sum,q)=>sum+Math.max(0,(qDays[q]||0)-(stdDaysQ?stdDaysQ[q]||0:0)),0);
+  const effectiveDays=STD_DAYS-(s.paidLeaveDays||0);
+
+  // 产值计算: 按各プロジェクト中该员工的工时占比分摊合同额和实收额
+  const totalCost=totalDays*getDailyRate(s);
+  let contractShare=0, actualShare=0;
+  projects.forEach(p=>{
+    const sd=(p.out.staffDays||[]).find(x=>x.staffId===s.id);
+    if(!sd)return;
+    const myDays=sdTotalDays(sd);
+    if(!myDays)return;
+    const projTotal=p.out.staffDays.reduce((a,x)=>a+sdTotalDays(x),0);
+    const w=projTotal>0?myDays/projTotal:0;
+    if(p.in.contracted)contractShare+=getContractTotal(p)*w;
+    actualShare+=calcTotalIn(p)*w;
+  });
+  const yuchan =totalCost>0?contractShare/totalCost:0;
+  const shijichan=totalCost>0?actualShare /totalCost:0;
+
+  useEffect(()=>{
+    if(!ref.current)return;
+    if(chart.current)chart.current.destroy();
+    if(slices.length===0)return;
+    chart.current=new Chart(ref.current,{
+      type:'doughnut',
+      data:{labels:slices.map(x=>x.name),datasets:[{
+        data:slices.map(x=>x.days),
+        backgroundColor:PIE_COLORS,borderWidth:1,borderColor:'#fff',hoverOffset:5
+      }]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:7,color:'rgba(20,20,20,.5)'}},
+          tooltip:{callbacks:{label:c=>` ${c.label}: ${c.parsed}日`}}
+        }
+      }
+    });
+    return()=>{if(chart.current)chart.current.destroy();};
+  },[JSON.stringify(slices)]);
+
+  return(
+    <div className="sc">
+      <div className="sc-name-row">
+        <input className="sc-name-ipt" type="text" value={s.name} onChange={e=>upd(s.id,'name',e.target.value)}/>
+        {totalDays>0&&<span style={{fontSize:11,color:'var(--t3)'}}>計{totalDays}日</span>}
+        <button onClick={del} title="スタッフ削除"
+          style={{marginLeft:'auto',background:'none',border:'none',cursor:'pointer',color:'var(--t3)',fontSize:13,lineHeight:1,padding:'0 2px'}}
+          >×</button>
+      </div>
+      {isAdmin&&<>
+        {/* 薪资期間リスト */}
+        <div style={{marginBottom:6}}>
+          <div style={{fontSize:11,fontWeight:600,color:'var(--t2)',marginBottom:4}}>月額基本給（期間を複数設定可）</div>
+          {(s.salaryPeriods||[]).map((sp,spi)=>(
+            <div key={spi} style={{display:'flex',alignItems:'center',gap:5,marginBottom:4}}>
+              <input type="month" style={{fontSize:11,padding:'2px 4px',border:'1px solid var(--s1)',borderRadius:4,color:'var(--t1)',outline:'none',width:130}}
+                placeholder="開始月"
+                value={sp.from||''} onChange={e=>upd(s.id,'salaryPeriods',(s.salaryPeriods||[]).map((x,i)=>i===spi?{...x,from:e.target.value}:x))}/>
+              <span style={{fontSize:10,color:'var(--t3)',whiteSpace:'nowrap'}}>起</span>
+              <MoneyInput style={{flex:1}} value={sp.amount||0} onChange={v=>upd(s.id,'salaryPeriods',(s.salaryPeriods||[]).map((x,i)=>i===spi?{...x,amount:v}:x))}/>
+              <span style={{fontSize:10,color:'var(--t3)',whiteSpace:'nowrap'}}>元/月</span>
+              {(s.salaryPeriods||[]).length>1&&(
+                <button onClick={()=>upd(s.id,'salaryPeriods',(s.salaryPeriods||[]).filter((_,i)=>i!==spi))}
+                  style={{background:'none',border:'none',cursor:'pointer',color:'var(--t3)',fontSize:13,lineHeight:1,padding:'0 2px'}}>×</button>
+              )}
+            </div>
+          ))}
+          <button className="add-btn" style={{fontSize:10,marginTop:2}} onClick={()=>upd(s.id,'salaryPeriods',[...(s.salaryPeriods||[]),{from:'',amount:0}])}>＋ 給与改定</button>
+        </div>
+        <div className="sc-fields">
+          <div className="sc-field">
+            <label>賞与額（円）</label>
+            <MoneyInput style={{width:'100%'}} value={s.bonusAmount||0} onChange={v=>upd(s.id,'bonusAmount',v)}/>
+          </div>
+          <div className="sc-field">
+            <label>年假日数</label>
+            <input type="number" style={{width:'100%'}} value={s.paidLeaveDays||''} onChange={e=>upd(s.id,'paidLeaveDays',Number(e.target.value))}/>
+          </div>
+        </div>
+        {/* 雇用契約満了 */}
+        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6,flexWrap:'wrap'}}>
+          <span style={{fontSize:11,color:'var(--t2)',whiteSpace:'nowrap'}}>雇用契約満了</span>
+          <input type="date" style={{fontSize:11,padding:'2px 5px',border:'1px solid var(--s1)',borderRadius:4,outline:'none',color:'var(--t1)',flex:1}}
+            value={s.contractExpiry||''} onChange={e=>upd(s.id,'contractExpiry',e.target.value)}/>
+          {s.contractExpiry&&(()=>{
+            const days=Math.ceil((new Date(s.contractExpiry)-new Date())/(1000*60*60*24));
+            return<span style={{fontSize:10,fontWeight:600,color:days<90?'var(--red)':days<180?'#c07800':'var(--green)',whiteSpace:'nowrap'}}>
+              {days>=0?`残り${days}日`:'期限切れ'}
+            </span>;
+          })()}
+        </div>
+        {/* 去年データ */}
+        <div style={{marginBottom:6,padding:'6px 8px',background:'var(--fill-3)',borderRadius:5,border:'1px solid var(--s2)'}}>
+          <div style={{fontSize:11,fontWeight:600,color:'var(--t2)',marginBottom:5}}>昨年実績</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:5}}>
+            <div>
+              <div style={{fontSize:10,color:'var(--t3)',marginBottom:2}}>月額基本給</div>
+              <MoneyInput style={{width:'100%',fontSize:11}} value={s.lastYearMonthly||0} onChange={v=>upd(s.id,'lastYearMonthly',v)}/>
+            </div>
+            <div>
+              <div style={{fontSize:10,color:'var(--t3)',marginBottom:2}}>賞与</div>
+              <MoneyInput style={{width:'100%',fontSize:11}} value={s.lastYearBonus||0} onChange={v=>upd(s.id,'lastYearBonus',v)}/>
+            </div>
+            <div>
+              <div style={{fontSize:10,color:'var(--t3)',marginBottom:2}}>年収</div>
+              <MoneyInput style={{width:'100%',fontSize:11}} value={s.lastYearAnnual||0} onChange={v=>upd(s.id,'lastYearAnnual',v)}/>
+            </div>
+          </div>
+        </div>
+        {/* メモ */}
+        <div style={{marginBottom:6}}>
+          <div style={{fontSize:11,color:'var(--t2)',marginBottom:3}}>メモ</div>
+          <textarea style={{width:'100%',fontSize:11,padding:'4px 6px',border:'1px solid var(--s1)',borderRadius:4,outline:'none',resize:'vertical',minHeight:52,color:'var(--t1)',background:'#fff',boxSizing:'border-box'}}
+            placeholder="フォロー事項・特記事項など…"
+            value={s.notes||''} onChange={e=>upd(s.id,'notes',e.target.value)}/>
+        </div>
+        {(s.salaryPeriods||[]).some(sp=>sp.amount>0)&&(
+          <div className="sc-computed">
+            <div className="r"><span>年薪合計</span><b>{fmtM(pw.total)}</b></div>
+            <div className="r"><span>日薪（含賞与）</span><b>{fmtM(pw.reg)}/日</b></div>
+            <div className="r"><span>加班日薪（不含賞与）</span><b>{fmtM(pw.ovt)}/日</b></div>
+            <div className="r"><span>有効営業日</span><b>{effectiveDays}日</b></div>
+            <div className="r"><span style={{color:overtimeDays>0?'var(--red)':'var(--t2)'}}>加班日数</span>
+              <b style={{color:overtimeDays>0?'var(--red)':'var(--t1)'}}>{overtimeDays}日</b></div>
+          </div>
+        )}
+      </>}
+      {slices.length>0?<div className="chart-wrap"><canvas ref={ref}/></div>
+        :null}
+
+      {totalDays>0&&(
+        <div style={{marginTop:10,padding:'8px 10px',background:'var(--fill-3)',borderRadius:6}}>
+          <ProductivityBar
+            label="予定産値"
+            value={yuchan}
+            desc="契約額 ÷ 投入コスト"/>
+          <ProductivityBar
+            label="実績産値"
+            value={shijichan}
+            desc="実収額 ÷ 投入コスト"/>
+          {isAdmin&&totalCost>0&&(
+            <div style={{fontSize:10,color:'var(--t3)',marginTop:4,display:'flex',justifyContent:'space-between'}}>
+              <span>投入コスト: <b style={{color:'var(--t1)'}}>{fmtM(totalCost)}</b></span>
+              <span>契約按分: <b style={{color:'var(--accent)'}}>{fmtM(contractShare)}</b></span>
+              <span>実収按分: <b style={{color:'var(--green-bar)'}}>{fmtM(actualShare)}</b></span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── BarChart ──────────────────────────────────────────────────────────────
+function BC({categories,series,height,stacked}){
+  const ref=useRef(null);const c=useRef(null);
+  useEffect(()=>{
+    if(!ref.current)return;
+    if(c.current)c.current.destroy();
+    c.current=new Chart(ref.current,{
+      type:'bar',
+      data:{labels:categories,datasets:series.map(s=>({
+        label:s.label,data:s.data,backgroundColor:s.color,
+        borderRadius:3,borderSkipped:false,stack:stacked?'s':undefined
+      }))},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{labels:{color:'rgba(20,20,20,.5)',font:{size:12},boxWidth:12,padding:14}},
+          tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ¥${c.parsed.y.toLocaleString('ja-JP')}`}},
+        },
+        scales:{
+          x:{stacked:!!stacked,grid:{color:'rgba(20,20,20,.07)'},ticks:{color:'rgba(20,20,20,.45)',font:{size:11}}},
+          y:{stacked:!!stacked,grid:{color:'rgba(20,20,20,.07)'},ticks:{color:'rgba(20,20,20,.45)',font:{size:11},callback:v=>'¥'+(v/10000).toFixed(0)+'万'}},
+        }
+      }
+    });
+    return()=>{if(c.current)c.current.destroy();};
+  },[JSON.stringify({categories,series,stacked})]);
+  return <div style={{position:'relative',height}}><canvas ref={ref}/></div>;
+}
+
+// ── App ───────────────────────────────────────────────────────────────────
+function App(){
+  // ローカルストレージからロード（フォールバック用）
+  const migrateAll=(raw)=>{
+    Object.keys(raw).forEach(k=>{if(Array.isArray(raw[k]))raw[k]=raw[k].map(migrateProject);});
+    if(Array.isArray(raw.staff))raw.staff=raw.staff.map(migrateStaff);
+    return raw;
+  };
+  const loadLocal=()=>{
+    try{
+      const raw=JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if(raw)return migrateAll(raw);
+      const old=JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if(old)return migrateAll(old);
+      return INIT_DATA;
+    }catch{return INIT_DATA;}
+  };
+  const hasRealData=d=>{
+    if(!d||typeof d!=='object')return false;
+    const yrs=Object.keys(d).filter(k=>/^\d{4}$/.test(k));
+    const hasProj=yrs.some(y=>(d[y]||[]).some(p=>(p.name||'').trim()||(p.projectNumber||'').trim()));
+    const hasStaff=(d.staff||[]).some(s=>(s.name||'').trim()&&s.name!=='新規スタッフ');
+    return hasProj||hasStaff||yrs.some(y=>(d[y]||[]).some(p=>
+      (p.out?.staffDays||[]).some(sd=>sdPts(sd)>0)||calcTotalIn(p)>0
+    ));
+  };
+  const isFileProtocol=()=>true; // 提出用：常にローカル専用
+
+  const [data,setData]       =useState(()=>loadLocal());
+  const dataRef              =useRef(null);
+  dataRef.current            =data;
+  const [hydrated,setHydrated]=useState(false);
+  const [loadInfo,setLoadInfo]=useState('');
+  const [period,setPeriod]   =useState('2026');
+  const [isAdmin,setIsAdmin] =useState(false);
+  const [showPin,setShowPin] =useState(false);
+  const [pin,setPin]         =useState('');
+  const [pinErr,setPinErr]   =useState('');
+  const [addingYr,setAddingYr]=useState(false);
+  const [newYr,setNewYr]     =useState('');
+  const [reportDate,setReportDate]=useState(()=>new Date().toISOString().slice(0,10));
+  const [reportBy,setReportBy]   =useState('');
+  const [lastSaved,setLastSaved] =useState(()=>{try{return JSON.parse(localStorage.getItem(META_KEY))||JSON.parse(localStorage.getItem(META_KEY))||null;}catch{return null;}});
+  const [saveFlash,setSaveFlash]       =useState(false);
+  const [lastSaveKind,setLastSaveKind] =useState(null); // 'server' | 'local'
+  const [openSubs,setOpenSubs]         =useState(new Set());
+  const toggleSub=id=>setOpenSubs(prev=>{const s=new Set(prev);s.has(id)?s.delete(id):s.add(id);return s;});
+  const ALL_STATUSES=new Set(Object.keys(S_LABEL));
+  const [visibleStatuses,setVisibleStatuses]=useState(new Set(Object.keys(S_LABEL)));
+  const toggleVisible=st=>setVisibleStatuses(prev=>{const s=new Set(prev);s.has(st)?s.delete(st):s.add(st);return s;});
+  const [collapsedProjects,setCollapsedProjects]=useState(new Set());
+  const toggleCollapse=id=>setCollapsedProjects(prev=>{const s=new Set(prev);s.has(id)?s.delete(id):s.add(id);return s;});
+  const collapseAll=()=>setCollapsedProjects(new Set(sortedProjects?.map(p=>p.id)||[]));
+  const expandAll=()=>setCollapsedProjects(new Set());
+  const [savedSnapshot,setSavedSnapshot]=useState(()=>{try{const r=JSON.parse(localStorage.getItem(STORAGE_KEY));if(r)return r;return null;}catch{return null;}});
+  const [serverMode,setServerMode]=useState(false); // サーバーから読み込めたかどうか
+
+  // 提出用：デモデータのみ（会社サーバー非接続）
+  useEffect(()=>{
+    const snap=loadLocal();
+    setData(snap);
+    setSavedSnapshot(JSON.parse(JSON.stringify(snap)));
+    setServerMode(false);
+    if(snap.reportBy)setReportBy(snap.reportBy);
+    if(snap.reportDate)setReportDate(snap.reportDate);
+    setLoadInfo('デモデータ（架空の設計事務所サンプル）');
+    setHydrated(true);
+  },[]);
+
+  // 初回ロード完了後のみ localStorage に書く（空データで上書きしない）
+  useEffect(()=>{
+    if(!hydrated||!data)return;
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  },[data,hydrated]);
+
+  if(!isFileProtocol()&&!hydrated){
+    return(
+      <div className="page" style={{padding:48,textAlign:'center',color:'var(--t2)'}}>
+        <div style={{fontSize:16,marginBottom:8}}>データを読み込み中…</div>
+        <div style={{fontSize:12}}>しばらくお待ちください</div>
+      </div>
+    );
+  }
+  if(!data){
+    return(
+      <div className="page" style={{padding:48,textAlign:'center',color:'var(--red)'}}>
+        読み込みに失敗しました。ページを再読み込みしてください
+      </div>
+    );
+  }
+
+  const years=Object.keys(data).filter(k=>/^\d{4}$/.test(k)).sort();
+  const projects=data[period]||[];
+  const staff=data.staff||[];
+
+  // プロジェクト番号または名前で年間度の累計人件費を返す
+  function calcLifetimeLabor(p){
+    const key=p.projectNumber||p.name||'';
+    if(!key)return null;
+    return years.reduce((total,yr)=>{
+      const ps=data[yr]||[];
+      const match=ps.find(x=>(x.projectNumber&&x.projectNumber===p.projectNumber)||(x.name&&x.name===p.name));
+      return total+(match?calcLaborCost(match,staff):0);
+    },0);
+  }
+  const ovhdRate=data.overheadRate||40;
+  // 自動計算：カレンダーから今年の各Q消化営業日数
+  const stdDaysQ=Object.fromEntries(QUARTERS.map(q=>[q,calcConsumedDays(q)]));
+  const stdDaysTotal=QUARTERS.reduce((s,q)=>s+(stdDaysQ[q]||0),0);
+
+  // make STD_DAYS reflect the editable year setting
+  STD_DAYS=data.stdDaysYear||261;
+  CURRENT_PERIOD=period; // Q別日給計算で使用
+  // Q caps: Q1-Q3 = 65, Q4 = remainder
+  const qDaysCap={Q1:65,Q2:65,Q3:65,Q4:Math.max(0,STD_DAYS-195)};
+
+  // summaries
+  const designProjects  =projects.filter(p=>p.type!=='indirect');
+  const indirectProjects=projects.filter(p=>p.type==='indirect');
+  const designLabor =designProjects .reduce((s,p)=>s+calcLaborCost(p,staff),0);
+  const indirectLabor=indirectProjects.reduce((s,p)=>s+calcLaborCost(p,staff),0);
+
+  const totalIn        =projects.reduce((s,p)=>s+calcTotalIn(p),0);
+  const totalContracted=designProjects.reduce((s,p)=>{
+    const sum=(p.contracts||[]).reduce((a,c)=>a+(c.amount||0),0);
+    return s+(sum||0);
+  },0);
+  const totalLabor=projects.reduce((s,p)=>s+calcLaborCost(p,staff),0);
+  const totalOvhd =calcOverhead(totalLabor,ovhdRate);
+  const totalSub  =projects.reduce((s,p)=>s+calcSubcontractCost(p),0);
+  const totalOut  =totalLabor+totalOvhd+totalSub;
+  const net       =totalIn-totalOut;
+
+  // quarterly
+  const qIn   =QUARTERS.map(q=>calcInByQ(projects,q));
+  const qLabor=QUARTERS.map(q=>calcLaborByQ(projects,staff,q));
+  const qOvhd =qLabor.map(l=>calcOverhead(l,ovhdRate));
+  const qSub  =QUARTERS.map(q=>calcSubcontractByQ(projects,q));
+  const updStdQ=(q,v)=>setData(prev=>({...prev,standardDaysQ:{...(prev.standardDaysQ||{}),Q1:0,Q2:0,Q3:0,Q4:0,...(prev.standardDaysQ||{}),[q]:Number(v)}}));
+
+  // project updaters
+  function updP(id,fn){setData(prev=>({...prev,[period]:prev[period].map(p=>p.id===id?fn(p):p)}));}
+  const updIn =(id,f,v)=>updP(id,p=>({...p,in:{...p.in,[f]:v}}));
+  const updPay=(id,ri,f,v)=>updP(id,p=>({...p,in:{...p.in,payments:p.in.payments.map((r,i)=>i===ri?{...r,[f]:v}:r)}}));
+  const addPay=(id)=>updP(id,p=>({...p,in:{...p.in,payments:[...p.in.payments,{label:'',demandDone:false,deliveryDone:false,note:'',amount:0,actualDate:'',actualAmount:0}]}}));
+  const delPay=(id,ri)=>updP(id,p=>({...p,in:{...p.in,payments:p.in.payments.filter((_,i)=>i!==ri)}}));
+  const updSD   =(id,si,f,v)=>updP(id,p=>({...p,out:{...p.out,staffDays:p.out.staffDays.map((sd,i)=>i===si?{...sd,[f]:v}:sd)}}));
+  const addSD   =(id)=>updP(id,p=>({...p,out:{...p.out,staffDays:[...p.out.staffDays,{staffId:'',q1:0,q2:0,q3:0,q4:0}]}}));
+  const removeSD=(id,si)=>updP(id,p=>({...p,out:{...p.out,staffDays:p.out.staffDays.filter((_,i)=>i!==si)}}));
+
+  // staff updaters
+  function updS(sid,field,val){
+    const stringFields=['name','contractExpiry','notes'];
+    const arrayFields=['salaryPeriods'];
+    const v=stringFields.includes(field)?val:arrayFields.includes(field)?val:Number(val);
+    setData(prev=>({...prev,staff:prev.staff.map(s=>s.id===sid?{...s,[field]:v}:s)}));
+  }
+  function addStaff(dept='design'){setData(prev=>({...prev,staff:[...prev.staff,{id:'s'+Date.now(),name:'新規スタッフ',dept,salaryPeriods:[{from:'',amount:0}],bonusAmount:0,paidLeaveDays:0,contractExpiry:'',notes:'',lastYearMonthly:0,lastYearBonus:0,lastYearAnnual:0}]}));}
+
+  function delProject(id){
+    if(!window.confirm('このプロジェクトを削除しますか？元に戻せません。'))return;
+    setData(prev=>({...prev,[period]:prev[period].filter(p=>p.id!==id)}));
+  }
+  function delStaff(sid){
+    if(!window.confirm('このスタッフを削除しますか？元に戻せません。'))return;
+    setData(prev=>({...prev,staff:prev.staff.filter(s=>s.id!==sid)}));
+  }
+  // contract entries
+  function addContract(id){updP(id,p=>({...p,in:{...p.in,contracts:[...(p.in.contracts||[]),{label:'追加契約',amount:0}]}}));}
+  function delContract(id,ci){updP(id,p=>({...p,in:{...p.in,contracts:(p.in.contracts||[]).filter((_,i)=>i!==ci)}}));}
+  function updContract(id,ci,f,v){updP(id,p=>({...p,in:{...p.in,contracts:(p.in.contracts||[]).map((c,i)=>i===ci?{...c,[f]:f==='label'?v:Number(v)}:c)}}));}
+
+  // design fee updaters（契約金額への自動同期なし）
+  function updDF(id,di,f,v){
+    updP(id,p=>({...p,designFees:(p.designFees||[]).map((d,i)=>i===di?{...d,[f]:f==='specialty'?v:Number(v)}:d)}));
+  }
+  function addDF(id){updP(id,p=>({...p,designFees:[...(p.designFees||[]),{specialty:'',area:0,unitPrice:0}]}));}
+  function delDF(id,di){updP(id,p=>({...p,designFees:(p.designFees||[]).filter((_,i)=>i!==di)}));}
+
+  function addProject(type='design'){setData(prev=>({...prev,[period]:[...(prev[period]||[]),{
+    id:'p'+Date.now(),projectNumber:'',
+    name:type==='indirect'?'新規部門':'新規プロジェクト',
+    status:'active',type,
+    designFees:[{specialty:'',area:0,unitPrice:0}],
+    in:{contracted:false,negotiating:false,contracts:[{label:'契約総額',amount:0}],payments:[{demandDone:false,deliveryDone:false,note:'',amount:0}],incomes:[]},
+    out:{staffDays:[],subcontracts:[]},
+  }]}));}
+
+  function addYear(){
+    if(/^\d{4}$/.test(newYr)&&!data[newYr]){
+      // 直前年のプロジェクトをベースに、スタッフ投入ポイントだけリセット
+      const prevYr=String(Number(newYr)-1);
+      const prevProjects=Array.isArray(data[prevYr])?data[prevYr]:[];
+      const resetProjects=prevProjects.map(p=>({
+        ...p,
+        out:{...p.out, staffDays:[]},    // 投入ポイントをリセット
+        id:'p'+Date.now()+Math.random(), // IDを新発行（重複防止）
+      }));
+      if(!window.confirm(`新年度 ${newYr} を作成します。\n${prevYr}年度のプロジェクト（${resetProjects.length}件）を引き継ぎ、\nスタッフ工数をリセットします。\nよろしいですか？`)){
+        setAddingYr(false);setNewYr('');return;
+      }
+      setData(prev=>({...prev,[newYr]:resetProjects}));
+      setPeriod(newYr);
+    }
+    setAddingYr(false);setNewYr('');
+  }
+
+  async function submitPin(){
+    if(pin===DEMO_PIN){setIsAdmin(true);setShowPin(false);setPinErr('');}
+    else setPinErr('PINが違います（デモ: 1234）');
+  }
+
+  function exportData(){
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const d=new Date();
+    const stamp=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+    a.href=url; a.download=`school_demo_backup_${stamp}.json`; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importData(e){
+    const file=e.target.files[0]; if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        const parsed=JSON.parse(ev.target.result);
+        if(!parsed.staff)throw new Error('無効なデータ形式');
+        if(!window.confirm('現在のデータをインポートしたファイルで上書きします。よろしいですか？'))return;
+        const migrated={...parsed,staff:(parsed.staff||[]).map(migrateStaff)};
+        Object.keys(migrated).filter(k=>/^\d{4}$/.test(k)).forEach(yr=>{
+          migrated[yr]=(migrated[yr]||[]).map(migrateProject);
+        });
+        setData(migrated);
+        localStorage.setItem(STORAGE_KEY,JSON.stringify(migrated));
+        alert('インポート完了。「保存」でブラウザに記録されます。');
+      }catch(err){alert('読み込み失敗：'+err.message);}
+    };
+    reader.readAsText(file);
+    e.target.value='';
+  }
+
+  async function handleSave(){
+    const snap=dataRef.current||data;
+    if(!snap){alert('データの読み込みが完了していません');return;}
+    const payload={...snap,reportBy,reportDate,_meta:{...(snap._meta||{}),savedAt:new Date().toISOString()}};
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(payload));
+    const meta={
+      timestamp:new Date().toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}),
+      by:reportBy||'—',date:reportDate,serverSaved:false,
+    };
+    localStorage.setItem(META_KEY,JSON.stringify(meta));
+    setData(payload);
+    setLastSaved(meta);
+    setLastSaveKind('local');
+    setSavedSnapshot(JSON.parse(JSON.stringify(payload)));
+    setLoadInfo('ブラウザに保存しました');
+    setSaveFlash(true);
+    setTimeout(()=>setSaveFlash(false),2500);
+  }
+
+  const staffWithData=staff.filter(s=>projects.some(p=>p.out.staffDays.some(sd=>sd.staffId===s.id&&sdPts(sd)>0)));
+
+  // 设计プロジェクト sorted (by projectNumber ascending — oldest first)
+  const sortedProjects=[...designProjects].sort((a,b)=>{
+    const na=a.projectNumber||'999999', nb=b.projectNumber||'999999';
+    return na.localeCompare(nb);
+  });
+  const sortedIndirect=[...indirectProjects].sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+
+  // totals for % bars
+  const allContractTotal=projects.filter(p=>p.in.contracted).reduce((s,p)=>s+getContractTotal(p),0);
+  const allLaborTotal   =projects.reduce((s,p)=>s+calcLaborCost(p,staff),0);
+
+  return(
+    <div className="page">
+
+      {/* PIN modal */}
+      {showPin&&(
+        <div className="overlay" onClick={()=>setShowPin(false)}>
+          <div className="mbox" onClick={e=>e.stopPropagation()}>
+            <h3>管理者モードに切替</h3>
+            <p>管理者PINを入力すると日給・収支の詳細が表示されます。</p>
+            <input type="password" placeholder="PIN" value={pin}
+              onChange={e=>setPin(e.target.value)}
+              onKeyDown={e=>e.key==='Enter'&&submitPin()} autoFocus/>
+            <div className="merr">{pinErr}</div>
+            <div className="macts">
+              <button className="bc" onClick={()=>setShowPin(false)}>キャンセル</button>
+              <button className="bp" onClick={submitPin}>解除</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {SCHOOL_DEMO&&(
+        <div style={{background:'rgba(46,118,171,.08)',border:'1px solid rgba(46,118,171,.35)',borderRadius:8,padding:'10px 14px',marginBottom:12,fontSize:13,color:'#2e5a7a'}}>
+          📘 <b>AIスクール提出用デモ</b> — 会社のNAS・実データとは接続していません。管理者PIN: <b>1234</b>
+        </div>
+      )}
+
+      {/* save status bar */}
+      {lastSaved
+        ?<div className="save-bar saved">
+            <span>{true
+              ?`✓ ブラウザに保存済み${lastSaved.serverBytes?'（'+lastSaved.serverBytes+'バイト）':''}`
+              :'💻 ローカルに保存'}</span>
+            <span style={{opacity:.6}}>·</span>
+            <span>{lastSaved.timestamp}</span>
+            <span style={{opacity:.6}}>·</span>
+            <span>記録者：<b>{lastSaved.by}</b></span>
+            <span style={{opacity:.6}}>·</span>
+            <span>記録日：{lastSaved.date}</span>
+          </div>
+        :<div className="save-bar unsaved">
+            {serverMode?'🌐 デモデータ — ':'💻 ローカル — '}
+            ⚠ 未保存です。右上の「保存」を押してください
+            {loadInfo&&<span style={{marginLeft:6}}>· {loadInfo}</span>}
+          </div>
+      }
+
+      {/* mode bar */}
+      {isAdmin
+        ?<div className="mode-bar admin"><span>🔓 管理者モード — 給与・収支データを表示中</span><button className="mode-btn" onClick={()=>setIsAdmin(false)}>スタッフモードに戻る</button></div>
+        :<div className="mode-bar staff"><span>👤 スタッフモード — 工数（日数）のみ入力可</span><button className="mode-btn" onClick={()=>{setPin('');setPinErr('');setShowPin(true);}}>管理者モードに切替</button></div>
+      }
+
+      {/* header */}
+      <div className="header">
+        <div>
+          <h1>建築設計事務所 収支ダッシュボード</h1>
+          <div className="sub">AIスクール提出用デモ（会社データとは別） · <b>版 2026-05-19-school-ja</b></div>
+        </div>
+        <div className="yr-row">
+          <span style={{fontSize:11,padding:'4px 8px',borderRadius:6,background:serverMode?'rgba(26,122,88,.12)':'rgba(176,104,0,.12)',color:serverMode?'var(--green)':'#b06800',fontWeight:600,whiteSpace:'nowrap'}}>
+            '💻 ローカル専用'
+          </span>
+          <button className={`save-btn${saveFlash?' flash':''}`} onClick={handleSave}
+            style={saveFlash&&lastSaveKind==='local'?{background:'#b06800'}:{}}>
+            {saveFlash
+              ?(lastSaveKind==='server'?'✓ ブラウザに保存済み':'⚠ ローカルに保存')
+              :'💾 保存'}
+          </button>
+          <button className="print-btn" onClick={()=>window.print()} title="印刷 / PDF保存 (A4)">🖨 PDF保存</button>
+          <select className="yr-select" value={period} onChange={e=>setPeriod(e.target.value)}>
+            {years.map(y=><option key={y} value={y}>{y}年度</option>)}
+          </select>
+          {addingYr
+            ?<><input className="yr-add-input" type="text" placeholder="例: 2027" autoFocus value={newYr}
+                onChange={e=>setNewYr(e.target.value)}
+                onKeyDown={e=>{if(e.key==='Enter')addYear();if(e.key==='Escape'){setAddingYr(false);setNewYr('');}}}/>
+              <button className="icon-btn" onClick={addYear} title="確定">✓</button>
+              <button className="icon-btn" onClick={()=>{setAddingYr(false);setNewYr('');}} title="キャンセル">✕</button>
+            </>
+            :<button className="icon-btn" title="年度を追加" onClick={()=>setAddingYr(true)}>＋</button>
+          }
+        </div>
+      </div>
+
+      {/* 記入日・記入者 */}
+      <div style={{display:'flex',alignItems:'center',gap:16,marginBottom:14,flexWrap:'wrap',fontSize:13}}>
+        <div style={{display:'flex',alignItems:'center',gap:6}}>
+          <span style={{color:'var(--t2)',minWidth:48}}>記録日</span>
+          <input type="date" style={{padding:'4px 8px',border:'1px solid var(--s1)',borderRadius:5,fontSize:13,outline:'none',background:'#fff',color:'var(--t1)'}}
+            value={reportDate} onChange={e=>setReportDate(e.target.value)}/>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:6}}>
+          <span style={{color:'var(--t2)',minWidth:48}}>記録者</span>
+          <input type="text" className="ipt" style={{width:120,padding:'4px 8px',fontSize:13}}
+            placeholder="氏名" value={reportBy} onChange={e=>setReportBy(e.target.value)}/>
+        </div>
+      </div>
+
+      {/* 今年の法定営業日数 — カレンダー自動計算、年間日数のみ編集可 */}
+      <div style={{background:'var(--fill-3)',border:'1px solid var(--s2)',borderRadius:8,padding:'12px 18px',marginBottom:14}}>
+        <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap',marginBottom:8}}>
+          <span style={{fontSize:13,fontWeight:600,minWidth:100}}>今年の法定営業日数</span>
+          <div style={{display:'flex',alignItems:'center',gap:5,fontSize:12}}>
+            <span style={{color:'var(--t2)'}}>年間</span>
+            <input type="number" style={{width:52,fontWeight:700}} value={STD_DAYS}
+              onChange={e=>setData(prev=>({...prev,stdDaysYear:Number(e.target.value)||261}))}/>
+            <span style={{color:'var(--t2)'}}>日</span>
+          </div>
+          <span style={{fontSize:12,color:'var(--t3)',marginLeft:8}}>※ カレンダーで月〜金を自動集計</span>
+          <span style={{fontSize:12,color:'var(--t2)',marginLeft:'auto'}}>
+            消化済み（自動）: <b style={{color:stdDaysTotal>STD_DAYS?'var(--red)':'var(--t1)'}}>{stdDaysTotal}</b>日
+            &nbsp;/&nbsp;年間: <b>{STD_DAYS}</b>日
+          </span>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
+          {QUARTERS.map(q=>{
+            const cap=qDaysCap[q]; const consumed=stdDaysQ[q]||0; const pct=Math.min(100,Math.round(consumed/cap*100));
+            const done=consumed>=cap;
+            return(
+              <div key={q} style={{background:'#fff',border:'1px solid var(--s2)',borderRadius:6,padding:'8px 10px'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:12,marginBottom:6}}>
+                  <b style={{color:Q_COLOR[q]}}>{q}</b>
+                  <span style={{fontSize:11,color:'var(--t3)'}}>上限 {cap}日</span>
+                </div>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:6}}>
+                  <span style={{fontSize:20,fontWeight:700,color:done?'var(--red-bar)':'var(--accent)'}}>{consumed}</span>
+                  <span style={{fontSize:11,color:done?'var(--red)':'var(--green)',fontWeight:600}}>
+                    {done?'完了':'残り'+(cap-consumed)+' 日'}
+                  </span>
+                </div>
+                <div style={{background:'var(--s2)',borderRadius:3,height:5}}>
+                  <div style={{width:pct+'%',height:'100%',background:done?'var(--red-bar)':Q_COLOR[q],borderRadius:3,transition:'width .4s'}}/>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* summary */}
+      {isAdmin&&(
+        <>
+        <div className="stats">
+          <div className="stat-card green">
+            <div className="stat-value">{fmtM(totalIn)}</div>
+            <div className="stat-label">入金合計</div>
+          </div>
+          <div className="stat-card red">
+            <div className="stat-value">{fmtM(totalLabor)}</div>
+            <div className="stat-label">人件費合計</div>
+          </div>
+          <div className="stat-card red">
+            <div className="stat-value">{fmtM(totalOvhd)}</div>
+            <div className="stat-label">運営費合計</div>
+            <div className="ovhd-row">
+              人件費 ×
+              <input type="number" style={{width:46}} value={ovhdRate}
+                onChange={e=>setData(prev=>({...prev,overheadRate:Number(e.target.value)}))}/>
+              %
+            </div>
+          </div>
+          <div className={`stat-card ${net>=0?'green':'red'}`}>
+            <div className="stat-value">{net>=0?'+':''}{fmtM(net)}</div>
+            <div className="stat-label">粗利</div>
+          </div>
+          {(()=>{
+            const n=staff.length||1;
+            const perContracted=Math.round(totalContracted/n);
+            const perIn=Math.round(totalIn/n);
+            const BENCH=500000;
+            const pct=Math.min(Math.round(perContracted/BENCH*100),999);
+            const color=perContracted>=BENCH?'var(--green)':'var(--accent)';
+            return(
+              <div className="stat-card" style={{borderColor:color,background:'var(--bg)'}}>
+                <div style={{fontSize:11,color:'var(--t3)',marginBottom:2}}>一人あたり産値（{n}名）</div>
+                <div style={{fontSize:16,fontWeight:700,color,lineHeight:1.2}}>{fmtM(perContracted)}</div>
+                <div style={{fontSize:10,color:'var(--t3)',marginTop:2}}>実収：{fmtM(perIn)}</div>
+                <div style={{display:'flex',alignItems:'center',gap:4,marginTop:5}}>
+                  <div style={{flex:1,height:5,background:'var(--s2)',borderRadius:3,overflow:'hidden'}}>
+                    <div style={{width:`${Math.min(pct,100)}%`,height:'100%',background:color,borderRadius:3,transition:'width .4s'}}/>
+                  </div>
+                  <span style={{fontSize:10,color,fontWeight:600,whiteSpace:'nowrap'}}>{pct}%</span>
+                </div>
+                <div style={{fontSize:9,color:'var(--t3)',marginTop:2}}>目安：¥500,000/人</div>
+              </div>
+            );
+          })()}
+          {/* 设计 vs 间接 人力比例 */}
+          {(()=>{
+            const total=totalLabor||1;
+            const dPct=totalLabor>0?Math.round(designLabor/total*100):0;
+            const iPct=totalLabor>0?Math.round(indirectLabor/total*100):0;
+            const dColor='var(--accent)';
+            const iColor='#8a5000';
+            return(<>
+              <div className="stat-card" style={{borderColor:dColor,background:'var(--bg)'}}>
+                <div style={{fontSize:11,color:'var(--t3)',marginBottom:2}}>設計プロジェクト人件費比率</div>
+                <div style={{fontSize:20,fontWeight:700,color:dColor,lineHeight:1.2}}>{dPct}<span style={{fontSize:13}}>%</span></div>
+                <div style={{fontSize:10,color:'var(--t3)',marginTop:2}}>{fmtM(designLabor)}</div>
+                <div style={{display:'flex',alignItems:'center',gap:4,marginTop:6}}>
+                  <div style={{flex:1,height:5,background:'var(--s2)',borderRadius:3,overflow:'hidden'}}>
+                    <div style={{width:`${dPct}%`,height:'100%',background:dColor,borderRadius:3,transition:'width .4s'}}/>
+                  </div>
+                  <span style={{fontSize:10,color:dColor,fontWeight:600,whiteSpace:'nowrap'}}>{dPct}%</span>
+                </div>
+                <div style={{fontSize:9,color:'var(--t3)',marginTop:2}}>人件費合計 {fmtM(totalLabor)}</div>
+              </div>
+              <div className="stat-card" style={{borderColor:iColor,background:'var(--bg)'}}>
+                <div style={{fontSize:11,color:'var(--t3)',marginBottom:2}}>管理部門人件費比率</div>
+                <div style={{fontSize:20,fontWeight:700,color:iColor,lineHeight:1.2}}>{iPct}<span style={{fontSize:13}}>%</span></div>
+                <div style={{fontSize:10,color:'var(--t3)',marginTop:2}}>{fmtM(indirectLabor)}</div>
+                <div style={{display:'flex',alignItems:'center',gap:4,marginTop:6}}>
+                  <div style={{flex:1,height:5,background:'var(--s2)',borderRadius:3,overflow:'hidden'}}>
+                    <div style={{width:`${iPct}%`,height:'100%',background:iColor,borderRadius:3,transition:'width .4s'}}/>
+                  </div>
+                  <span style={{fontSize:10,color:iColor,fontWeight:600,whiteSpace:'nowrap'}}>{iPct}%</span>
+                </div>
+                <div style={{fontSize:9,color:'var(--t3)',marginTop:2}}>※ 間接比率が高すぎないか注意</div>
+              </div>
+            </>);
+          })()}
+          {/* 留公司资金 */}
+          {(()=>{
+            const rf=data.retainedFunds||0;
+            return(
+              <div className="stat-card" style={{borderColor:'#5b7fa6',background:'var(--bg)'}}>
+                <div style={{fontSize:11,color:'var(--t3)',marginBottom:4}}>社内留保資金</div>
+                <MoneyInput
+                  value={rf}
+                  onChange={v=>setData(prev=>({...prev,retainedFunds:v}))}
+                  style={{fontSize:16,fontWeight:700,color:'#3b5f8a',border:'none',borderBottom:'2px solid #5b7fa6',borderRadius:0,background:'transparent',padding:'2px 0',width:'100%'}}
+                />
+                <div style={{fontSize:9,color:'var(--t3)',marginTop:6}}>手入力・年末までの累計</div>
+              </div>
+            );
+          })()}
+        </div>
+        {/* quarterly breakdown */}
+        {/* 計算式バー */}
+        <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',fontSize:12,color:'var(--t3)',marginBottom:8,padding:'6px 10px',background:'var(--fill-3)',borderRadius:6,border:'1px solid var(--s2)'}}>
+          <span style={{color:'var(--green)',fontWeight:600}}>粗利</span>
+          <span>=</span>
+          <span style={{color:'var(--green-bar)',fontWeight:600}}>入金済</span>
+          <span>−</span>
+          <span style={{color:'var(--red-bar)',fontWeight:600}}>人件費</span>
+          <span>−</span>
+          <span style={{color:'var(--red-bar)'}}>運営費（×{ovhdRate}%）</span>
+          <span>−</span>
+          <span style={{color:'#c07800',fontWeight:600}}>設計外注費</span>
+          <span style={{marginLeft:'auto',fontWeight:700,fontSize:13,color:net>=0?'var(--green)':'var(--red)'}}>
+            = {net>=0?'+':''}{fmtM(net)}
+          </span>
+        </div>
+        <div style={{border:'1px solid var(--s2)',borderRadius:8,overflow:'hidden',marginBottom:22,fontSize:12}}>
+          <table style={{width:'100%',borderCollapse:'collapse'}}>
+            <thead>
+              <tr style={{background:'var(--fill-3)'}}>
+                <th style={{padding:'7px 14px',textAlign:'left',fontWeight:600,color:'var(--t2)',borderBottom:'1px solid var(--s2)',width:'18%'}}></th>
+                {QUARTERS.map(q=><th key={q} style={{padding:'7px 14px',textAlign:'right',fontWeight:600,color:'var(--t2)',borderBottom:'1px solid var(--s2)'}}>{q}</th>)}
+                <th style={{padding:'7px 14px',textAlign:'right',fontWeight:700,color:'var(--t1)',borderBottom:'1px solid var(--s2)'}}>合計</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style={{background:'rgba(26,122,88,.04)'}}>
+                <td style={{padding:'6px 14px',color:'var(--green)',fontWeight:600}}>入金済</td>
+                {qIn.map((v,i)=><td key={i} style={{padding:'6px 14px',textAlign:'right',color:v?'var(--green-bar)':'var(--t3)'}}>{fmtM(v)}</td>)}
+                <td style={{padding:'6px 14px',textAlign:'right',fontWeight:700,color:'var(--green)'}}>{fmtM(totalIn)}</td>
+              </tr>
+              <tr>
+                <td style={{padding:'6px 14px',color:'var(--red)',fontWeight:600}}>人件費</td>
+                {qLabor.map((v,i)=><td key={i} style={{padding:'6px 14px',textAlign:'right',color:v?'var(--red-bar)':'var(--t3)'}}>{fmtM(v)}</td>)}
+                <td style={{padding:'6px 14px',textAlign:'right',fontWeight:700,color:'var(--red)'}}>{fmtM(totalLabor)}</td>
+              </tr>
+              <tr style={{background:'rgba(192,48,74,.03)'}}>
+                <td style={{padding:'6px 14px',color:'var(--red)',fontWeight:600,opacity:.7}}>運営費({ovhdRate}%)</td>
+                {qOvhd.map((v,i)=><td key={i} style={{padding:'6px 14px',textAlign:'right',color:v?'var(--red-bar)':'var(--t3)',opacity:.8}}>{fmtM(v)}</td>)}
+                <td style={{padding:'6px 14px',textAlign:'right',fontWeight:700,color:'var(--red)',opacity:.8}}>{fmtM(totalOvhd)}</td>
+              </tr>
+              <tr style={{background:'rgba(176,104,0,.04)'}}>
+                <td style={{padding:'6px 14px',color:'#8a5000',fontWeight:600}}>設計外注費</td>
+                {qSub.map((v,i)=><td key={i} style={{padding:'6px 14px',textAlign:'right',color:v?'#c07800':'var(--t3)'}}>{fmtM(v)}</td>)}
+                <td style={{padding:'6px 14px',textAlign:'right',fontWeight:700,color:'#8a5000'}}>{fmtM(totalSub)}</td>
+              </tr>
+              {/* 粗利行 */}
+              {(()=>{
+                const qNet=qIn.map((v,i)=>v-qLabor[i]-qOvhd[i]-qSub[i]);
+                return(
+                  <tr style={{background:'rgba(26,122,88,.06)',borderTop:'2px solid var(--s1)'}}>
+                    <td style={{padding:'6px 14px',color:'var(--green)',fontWeight:700}}>粗利</td>
+                    {qNet.map((v,i)=><td key={i} style={{padding:'6px 14px',textAlign:'right',fontWeight:700,color:v>=0?'var(--green)':'var(--red)'}}>{v>=0?'+':''}{fmtM(v)}</td>)}
+                    <td style={{padding:'6px 14px',textAlign:'right',fontWeight:700,color:net>=0?'var(--green)':'var(--red)'}}>{net>=0?'+':''}{fmtM(net)}</td>
+                  </tr>
+                );
+              })()}
+            </tbody>
+          </table>
+        </div>
+        </>
+      )}
+
+      <hr className="divider"/>
+
+      {/* main table */}
+      <h2>プロジェクト収支</h2>
+      {/* ステータスフィルター */}
+      {(()=>{
+        const STATUS_COLOR={
+          negotiating:'#b06800',
+          active:     'var(--accent)',
+          'design-done':'#2d7a4a',
+          reserved:   '#8a5000',
+          completed:  '#555',
+        };
+        const hiddenCount=sortedProjects.filter(p=>!visibleStatuses.has(p.status)).length;
+        return(
+          <div className="no-print" style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap',marginBottom:10,fontSize:12}}>
+            <span style={{color:'var(--t3)',fontWeight:500,flexShrink:0}}>表示ステータス：</span>
+            {Object.entries(S_LABEL).map(([st,label])=>{
+              const on=visibleStatuses.has(st);
+              const color=STATUS_COLOR[st]||'#666';
+              const cnt=sortedProjects.filter(p=>p.status===st).length;
+              return(
+                <button key={st} onClick={()=>toggleVisible(st)}
+                  style={{display:'flex',alignItems:'center',gap:4,padding:'4px 10px',borderRadius:12,
+                    border:`1.5px solid ${on?color:'var(--s2)'}`,
+                    background:on?`${color}18`:'var(--fill-3)',
+                    cursor:'pointer',color:on?color:'var(--t3)',
+                    fontWeight:on?600:400,fontSize:11,transition:'all .15s',
+                    opacity:cnt===0?.4:1}}>
+                  {on&&<span style={{fontSize:9,lineHeight:1}}>✓</span>}
+                  {label}
+                  <span style={{background:on?color:'var(--s2)',color:'#fff',borderRadius:8,padding:'0 5px',fontSize:10,minWidth:14,textAlign:'center'}}>{cnt}</span>
+                </button>
+              );
+            })}
+            {hiddenCount>0&&<span style={{color:'var(--t3)',fontSize:11,marginLeft:4}}>（非表示 {hiddenCount} 件）</span>}
+            <div style={{marginLeft:'auto',display:'flex',gap:6}}>
+              <button onClick={collapseAll} style={{fontSize:11,padding:'3px 10px',borderRadius:12,border:'1px solid var(--s2)',background:'#fff',cursor:'pointer',color:'var(--t2)'}}>すべて折りたたむ</button>
+              <button onClick={expandAll}   style={{fontSize:11,padding:'3px 10px',borderRadius:12,border:'1px solid var(--s2)',background:'#fff',cursor:'pointer',color:'var(--t2)'}}>すべて展開</button>
+            </div>
+          </div>
+        );
+      })()}
+      <div className="tbl-wrap">
+        <table>
+          <colgroup><col className="c-proj"/><col className="c-in"/><col className="c-out"/></colgroup>
+          <thead>
+            <tr>
+              <th style={{background:'var(--fill-3)'}}>プロジェクト</th>
+              <th className="in-bg bl">IN（入金状況）</th>
+              <th className="out-bg bl">OUT（人件費）</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedProjects.filter(p=>visibleStatuses.has(p.status)).map((p,pi)=>{
+              const labor=calcLaborCost(p,staff);
+              const ovhd=calcOverhead(labor,ovhdRate);
+              const sub=calcSubcontractCost(p);
+              const pOut=labor+ovhd+sub;
+              const pIn=calcTotalIn(p);
+              const bal=pIn-pOut;
+              const pctContract=allContractTotal>0&&p.in.contracted?Math.round(getContractTotal(p)/allContractTotal*100):0;
+              const pctIn      =totalIn>0?Math.round(pIn/totalIn*100):0;
+              const pctLabor   =allLaborTotal>0?Math.round(labor/allLaborTotal*100):0;
+              const isCollapsed=collapsedProjects.has(p.id);
+              return(
+                <tr key={p.id} className={pi%2!==0?'odd':''}>
+
+                  {/* 折りたたみ時：1行サマリー */}
+                  {isCollapsed?(
+                    <td colSpan={3} style={{padding:0,borderBottom:'2px solid var(--s2)'}}>
+                      <div className="proj-collapsed-row no-print-hidden" onClick={()=>toggleCollapse(p.id)}>
+                        <span style={{fontSize:16,color:'var(--t3)',lineHeight:1}}>▶</span>
+                        <span style={{fontFamily:'monospace',fontSize:11,color:'var(--t3)',flexShrink:0}}>{p.projectNumber||'—'}</span>
+                        <span style={{fontSize:15,fontWeight:700,color:'var(--t1)',minWidth:120}}>{p.name}</span>
+                        <span style={{fontSize:11,padding:'2px 8px',borderRadius:10,background:S_PILL[p.status]||'#eee',color:'#fff',flexShrink:0}}>{S_LABEL[p.status]||p.status}</span>
+                        <span style={{flex:1}}/>
+                        <span style={{fontSize:12,color:'var(--t3)'}}>IN 合計：</span>
+                        <span style={{fontSize:13,fontWeight:600,color:'var(--green-bar)'}}>{fmtM(pIn)}</span>
+                        {isAdmin&&<>
+                          <span style={{fontSize:12,color:'var(--t3)',marginLeft:12}}>OUT 合計：</span>
+                          <span style={{fontSize:13,fontWeight:600,color:'var(--red-bar)'}}>{fmtM(pOut)}</span>
+                          <span style={{fontSize:12,color:'var(--t3)',marginLeft:12}}>差額：</span>
+                          <span style={{fontSize:13,fontWeight:600,color:bal>=0?'var(--green)':'var(--red)'}}>{bal>=0?'+':''}{fmtM(bal)}</span>
+                        </>}
+                      </div>
+                    </td>
+                  ):(
+                  <>
+                  {/* Pane 1 */}
+                  <td>
+                    <div className="p1-cell">
+                      <div style={{marginBottom:5,display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                        {/* 折りたたみトグルボタン */}
+                        <button onClick={()=>toggleCollapse(p.id)} title="折りたたむ"
+                          style={{background:'none',border:'none',cursor:'pointer',fontSize:14,color:'var(--t3)',padding:'0 2px',lineHeight:1,flexShrink:0}}>▼</button>
+                        <div className="proj-line" style={{flex:1}}>
+                          <input className="proj-no-ipt" type="text" placeholder="番号" value={p.projectNumber||''} onChange={e=>updP(p.id,x=>({...x,projectNumber:e.target.value}))}/>
+                          <input className="proj-name-ipt" type="text" value={p.name} onChange={e=>updP(p.id,x=>({...x,name:e.target.value}))}/>
+                        </div>
+                        <select style={{fontSize:11,padding:'2px 6px',borderRadius:4,border:'1px solid var(--s1)',background:'#fff',color:'var(--t1)',outline:'none'}}
+                          value={p.status} onChange={e=>updP(p.id,x=>({...x,status:e.target.value}))}>
+                          {Object.entries(S_LABEL).map(([v,l])=><option key={v} value={v}>{l}</option>)}
+                        </select>
+                        <button onClick={()=>delProject(p.id)} title="削除プロジェクト"
+                          style={{background:'none',border:'1px solid rgba(192,48,74,.3)',color:'var(--red)',borderRadius:4,cursor:'pointer',fontSize:12,padding:'2px 7px',lineHeight:1.4}}>
+                          削除
+                        </button>
+                      </div>
+                      {/* 設計費明細 */}
+                      <div style={{marginTop:8,marginBottom:4}}>
+                        <table className="df-table">
+                          <colgroup>
+                            <col className="df-c1"/><col className="df-c2"/><col className="df-c3"/><col className="df-c4"/><col className="df-c5"/>
+                          </colgroup>
+                          <thead>
+                            <tr>
+                              <th>设计专项</th>
+                              <th>面積(㎡)</th>
+                              <th>単価(元/㎡)</th>
+                              <th>专项费用</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(p.designFees||[]).map((df,di)=>{
+                              const sub=(df.area||0)*(df.unitPrice||0);
+                              return(
+                                <tr key={di}>
+                                  <td><input type="text" className="ipt" style={{fontSize:11}} placeholder="例：意匠設計" value={df.specialty||''} onChange={e=>updDF(p.id,di,'specialty',e.target.value)}/></td>
+                                  <td><input type="number" value={df.area||''} onChange={e=>updDF(p.id,di,'area',e.target.value)}/></td>
+                                  <td><input type="number" value={df.unitPrice||''} onChange={e=>updDF(p.id,di,'unitPrice',e.target.value)}/></td>
+                                  <td style={{fontWeight:sub>0?600:400,color:sub>0?'var(--accent)':'var(--t3)'}}>{sub>0?fmtM(sub):'—'}</td>
+                                  <td><button onClick={()=>delDF(p.id,di)} style={{background:'none',border:'none',cursor:'pointer',color:'var(--t3)',fontSize:13}}>×</button></td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                        <button className="add-btn" style={{fontSize:10}} onClick={()=>addDF(p.id)}>＋ 専門科目を追加</button>
+                        {(()=>{
+                          const refTotal=(p.designFees||[]).reduce((s,d)=>s+(d.area||0)*(d.unitPrice||0),0);
+                          const contracts=p.in.contracts||[];
+                          const contractTotal=getContractTotal(p);
+                          return(
+                            <div style={{marginTop:8,borderTop:'1px solid var(--s2)',paddingTop:7}}>
+                              {refTotal>0&&(
+                                <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'var(--t3)',marginBottom:6,padding:'3px 6px',background:'var(--fill-3)',borderRadius:3}}>
+                                  <span>专项费用合計（参考）</span>
+                                  <span style={{fontWeight:600}}>{fmtM(refTotal)}</span>
+                                </div>
+                              )}
+                              <div style={{fontSize:11,color:'var(--t2)',fontWeight:600,marginBottom:4}}>契約金額明细</div>
+                              {contracts.map((c,ci)=>(
+                                <div key={ci} style={{display:'flex',alignItems:'center',gap:5,marginBottom:5}}>
+                                  <input type="text" className="ipt" style={{flex:1,minWidth:0,fontSize:11,padding:'2px 6px'}}
+                                    placeholder={ci===0?'契約総額':'追加契約の説明'}
+                                    value={c.label||''} onChange={e=>updContract(p.id,ci,'label',e.target.value)}/>
+                                  <MoneyInput style={{width:110,fontWeight:600}} value={c.amount||0} onChange={v=>updContract(p.id,ci,'amount',v)}/>
+                                  <span style={{fontSize:11,color:'var(--t3)',whiteSpace:'nowrap'}}>元</span>
+                                  {contracts.length>1&&(
+                                    <button onClick={()=>delContract(p.id,ci)}
+                                      style={{background:'none',border:'none',cursor:'pointer',color:'var(--t3)',fontSize:14,lineHeight:1,padding:'0 2px'}} title="削除">×</button>
+                                  )}
+                                </div>
+                              ))}
+                              <button className="add-btn" style={{fontSize:10,marginBottom:4}} onClick={()=>addContract(p.id)}>＋ 追加契約</button>
+                              {contracts.length>1&&(
+                                <div className="df-total" style={{marginTop:4}}>
+                                  <span style={{fontSize:11,color:'var(--t2)'}}>合同合計金额</span>
+                                  <span style={{color:'var(--accent)',fontWeight:700}}>{fmtM(contractTotal)}</span>
+                                </div>
+                              )}
+                              <div style={{fontSize:10,color:'var(--t3)',marginTop:3,paddingLeft:2}}>↑ 自动同步至 IN 栏合同合計金额</div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+
+                      <div className="mini-box">
+                        <div className="mini-row"><span className="mini-lbl">入金済</span><span className="mini-val blue">{fmtM(pIn)}</span></div>
+                        {isAdmin&&<>
+                          <div className="mini-hr"/>
+                          <div className="mini-row"><span className="mini-lbl">支出</span><span className="mini-val red">{fmtM(pOut)}</span></div>
+                          <div className="mini-row"><span className="mini-lbl">差額</span><span className={`mini-val ${bal>=0?'green':'red'}`}>{bal>=0?'+':''}{fmtM(bal)}</span></div>
+                        </>}
+                        <div className="mini-hr"/>
+                        {/* 3 ratio bars */}
+                        {[
+                          {label:'契約比率', val:pctContract, color:'var(--accent)',   show:p.in.contracted},
+                          {label:'入金比率', val:pctIn,       color:'var(--green-bar)', show:true},
+                          {label:'人件費比率', val:pctLabor,    color:'var(--red-bar)',   show:isAdmin},
+                        ].filter(b=>b.show).map(b=>(
+                          <div key={b.label} style={{marginBottom:5}}>
+                            <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--t3)',marginBottom:2}}>
+                              <span>{b.label}</span><span style={{fontWeight:600,color:'var(--t2)'}}>{b.val}%</span>
+                            </div>
+                            <div style={{background:'var(--s2)',borderRadius:3,height:5,overflow:'hidden'}}>
+                              <div style={{width:b.val+'%',height:'100%',background:b.color,borderRadius:3,transition:'width .4s'}}/>
+                            </div>
+                          </div>
+                        ))}
+                        {/* 全期累計人工費（管理者のみ・複数年ある場合に表示） */}
+                        {isAdmin&&years.length>1&&(()=>{
+                          const lifetime=calcLifetimeLabor(p);
+                          if(lifetime===null||lifetime===labor)return null;
+                          const contractTotal=(p.contracts||[]).reduce((s,c)=>s+(c.amount||0),0);
+                          const lifetimeRatio=contractTotal>0?Math.round(lifetime/contractTotal*100):null;
+                          return(
+                            <div style={{marginTop:8,paddingTop:7,borderTop:'1px dashed var(--s2)'}}>
+                              <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+                                <span style={{fontSize:10,color:'var(--t3)'}}>全期累计人件費</span>
+                                <span style={{fontSize:12,fontWeight:700,color:'var(--red-bar)'}}>{fmtM(lifetime)}</span>
+                              </div>
+                              {lifetimeRatio!==null&&(
+                                <div style={{fontSize:10,color:'var(--t3)',marginTop:2}}>
+                                  占合同总价 <span style={{fontWeight:600,color:lifetimeRatio>50?'var(--red)':'var(--t2)'}}>{lifetimeRatio}%</span>
+                                  <span style={{marginLeft:6,color:'#aaa'}}>（本年 {fmtM(labor)}）</span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Pane 2 */}
+                  <td className="bl">
+                    <div className="p2-cell">
+                      <div style={{marginBottom:8}}>
+                        <label className="ck-label"><input type="checkbox" checked={!!p.in.negotiating} onChange={e=>updIn(p.id,'negotiating',e.target.checked)}/>商談中</label>
+                        <label className="ck-label"><input type="checkbox" checked={!!p.in.contracted} onChange={e=>updIn(p.id,'contracted',e.target.checked)}/>契約済</label>
+                      </div>
+                      {/* 合同合計（Pane1の明細から計算、読み取り専用） */}
+                      <div style={{display:'grid',gridTemplateColumns:'38px 110px 1fr auto auto',alignItems:'center',gap:'4px 6px',padding:'6px 0 8px',borderBottom:'1px solid var(--s2)',marginBottom:8}}>
+                        <span style={{fontSize:11,color:'var(--t2)',fontWeight:600}}>合同</span>
+                        <span/>
+                        <div style={{display:'flex',alignItems:'center',background:'var(--fill-3)',borderRadius:3,padding:'3px 8px',border:'1px solid var(--s2)'}}>
+                          <span style={{flex:1,fontSize:12,fontWeight:700,color:'var(--accent)',letterSpacing:.3}}>{fmtM(getContractTotal(p))}</span>
+                        </div>
+                        <span className="ipt-u">元</span>
+                        <span className="pct-badge">100%</span>
+                      </div>
+                      {(p.in.payments||[]).map((r,ri)=>(
+                        <div key={ri} className="pay-block">
+                          <div className="pay-head">
+                            <div style={{display:'flex',alignItems:'center',gap:5,flex:1,minWidth:0}}>
+                              <span className="pay-title" style={{whiteSpace:'nowrap'}}>第{ri+1}次</span>
+                              <input type="text" className="ipt" style={{flex:1,minWidth:0,fontSize:11,padding:'1px 6px'}}
+                                placeholder="入金名目（着手金/基本設計 など）"
+                                value={r.label||''} onChange={e=>updPay(p.id,ri,'label',e.target.value)}/>
+                            </div>
+                            <div style={{display:'flex',alignItems:'center',gap:4,flexShrink:0,marginLeft:6}}>
+                              <label className="ck-label"><input type="checkbox" checked={!!r.demandDone} onChange={e=>updPay(p.id,ri,'demandDone',e.target.checked)}/>請求済</label>
+                              <label className="ck-label"><input type="checkbox" checked={!!r.deliveryDone} onChange={e=>updPay(p.id,ri,'deliveryDone',e.target.checked)}/>納品済</label>
+                              <button onClick={()=>delPay(p.id,ri)}
+                                style={{background:'none',border:'none',cursor:'pointer',color:'var(--t3)',fontSize:14,lineHeight:1,padding:'0 2px'}}
+                                title="削除此笔款项">×</button>
+                            </div>
+                          </div>
+                          {/* 5列グリッド: [ラベル38px] [日付110px] [金額] [単位] [バッジ] */}
+                          <div style={{display:'grid',gridTemplateColumns:'38px 110px 1fr auto auto',alignItems:'center',gap:'5px 6px'}}>
+                            <span style={{fontSize:11,color:'var(--t2)'}}>预计</span>
+                            <span/>
+                            <MoneyInput style={{width:'100%'}} value={r.amount||0} onChange={v=>updPay(p.id,ri,'amount',v)}/>
+                            <span className="ipt-u">元</span>
+                            <span>{getContractTotal(p)>0&&r.amount>0?<span className="pct-badge">{pctStr(r.amount,getContractTotal(p))}</span>:null}</span>
+
+                            <span style={{fontSize:11,color:'var(--green-bar)',fontWeight:600}}>实收</span>
+                            <input type="date" style={{fontSize:11,padding:'2px 4px',border:'1px solid var(--s1)',borderRadius:4,background:r.actualAmount>0?'rgba(26,122,88,.07)':'#fff',color:'var(--t1)',outline:'none',width:'100%'}}
+                              value={r.actualDate||''} onChange={e=>updPay(p.id,ri,'actualDate',e.target.value)}/>
+                            <MoneyInput style={{width:'100%',background:r.actualAmount>0?'rgba(26,122,88,.07)':'#fff'}} value={r.actualAmount||0} onChange={v=>updPay(p.id,ri,'actualAmount',v)}/>
+                            <span className="ipt-u">元</span>
+                            <span>{r.actualAmount>0?<span style={{fontSize:10,fontWeight:600,color:'var(--green-bar)'}}>{dateToQ(r.actualDate)||'?'}✓</span>:null}</span>
+                          </div>
+                          <input className="note-ipt" type="text" placeholder="メモ" value={r.note||''} onChange={e=>updPay(p.id,ri,'note',e.target.value)} style={{marginTop:5}}/>
+                        </div>
+                      ))}
+                      <button className="add-btn" onClick={()=>addPay(p.id)}>＋ 入金回数を追加</button>
+                      <div className="in-total">入金合計：<b>{fmtM(pIn)}</b></div>
+                    </div>
+                  </td>
+
+                  {/* Pane 3 */}
+                  <td className="bl">
+                    <div className="p3-cell">
+                      {[...(p.out.staffDays||[])].sort((a,b)=>{
+                        const ai=staff.findIndex(x=>x.id===a.staffId);
+                        const bi=staff.findIndex(x=>x.id===b.staffId);
+                        return(ai<0?999:ai)-(bi<0?999:bi);
+                      }).map(sd=>{
+                        const si=(p.out.staffDays||[]).indexOf(sd);
+                        const savedProj=(savedSnapshot?.[period]||[]).find(x=>x.id===p.id);
+                        const savedSd=(savedProj?.out?.staffDays||[]).find(x=>x.staffId===sd.staffId);
+                        return(
+                          <StaffDayRow key={si} sd={sd} si={si} pId={p.id}
+                            staff={staff} isAdmin={isAdmin}
+                            updSD={updSD} removeSD={removeSD} savedSd={savedSd}/>
+                        );
+                      })}
+                      <button className="add-btn" onClick={()=>addSD(p.id)}>＋ スタッフ追加</button>
+                      {isAdmin&&(
+                        <div className="out-total">
+                          人件費：<b>{fmtM(labor)}</b><br/>
+                          運営費（×{ovhdRate}%）：<b>{fmtM(ovhd)}</b>
+                        </div>
+                      )}
+                      {/* 設計外注費（折りたたみ） */}
+                      {(()=>{
+                        const subs=p.out.subcontracts||[];
+                        const subTotal=calcSubcontractCost(p);
+                        const isOpen=openSubs.has(p.id);
+                        const updSubs=fn=>updP(p.id,x=>({...x,out:{...x.out,subcontracts:fn(x.out.subcontracts||[])}}));
+                        return(
+                          <div style={{marginTop:8,borderTop:'1px dashed var(--s2)',paddingTop:6}}>
+                            <button onClick={()=>toggleSub(p.id)}
+                              style={{background:'none',border:'none',cursor:'pointer',fontSize:11,color:subTotal>0?'#8a5000':'var(--t3)',padding:0,display:'flex',alignItems:'center',gap:4,fontWeight:subTotal>0?600:400}}>
+                              <span>{isOpen?'▼':'▶'}</span>
+                              <span>設計外注費</span>
+                              {subs.length>0&&<span style={{color:'#c07800'}}>（{subs.length}件 {fmtM(subTotal)}）</span>}
+                            </button>
+                            {isOpen&&(
+                              <div style={{marginTop:6,paddingLeft:4}}>
+                                {subs.map((sc,sci)=>(
+                                  <div key={sci} style={{display:'grid',gridTemplateColumns:'1fr 100px 90px auto',alignItems:'center',gap:'4px 6px',marginBottom:5}}>
+                                    <input type="text" className="ipt" style={{fontSize:11,padding:'3px 6px'}}
+                                      placeholder="外注内容（例：ランドスケープ）"
+                                      value={sc.label||''} onChange={e=>updSubs(s=>s.map((r,i)=>i===sci?{...r,label:e.target.value}:r))}/>
+                                    <input type="date" style={{fontSize:11,padding:'2px 4px',border:'1px solid var(--s1)',borderRadius:4,outline:'none',color:'var(--t1)',width:'100%'}}
+                                      value={sc.date||''} onChange={e=>updSubs(s=>s.map((r,i)=>i===sci?{...r,date:e.target.value}:r))}/>
+                                    <MoneyInput style={{width:'100%',background:sc.amount>0?'rgba(176,104,0,.08)':'#fff'}}
+                                      value={sc.amount||0} onChange={v=>updSubs(s=>s.map((r,i)=>i===sci?{...r,amount:v}:r))}/>
+                                    <button onClick={()=>updSubs(s=>s.filter((_,i)=>i!==sci))}
+                                      style={{background:'none',border:'none',cursor:'pointer',color:'var(--t3)',fontSize:14,lineHeight:1,padding:'0 2px'}}>×</button>
+                                  </div>
+                                ))}
+                                <button className="add-btn" style={{fontSize:10}} onClick={()=>updSubs(s=>[...s,{label:'',date:'',amount:0}])}>＋ 外注を追加</button>
+                                {subTotal>0&&<div style={{fontSize:11,color:'#8a5000',fontWeight:600,marginTop:4}}>外注合計：{fmtM(subTotal)}</div>}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </td>
+                </>
+                )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <button className="add-row-btn" onClick={()=>addProject('design')}>＋ 新規プロジェクト</button>
+
+      <hr className="divider"/>
+
+      {/* プロジェクト以外 — 设计プロジェクト収支と同じ列構造 */}
+      <h2 style={{marginTop:28}}>
+        プロジェクト以外
+        <span style={{fontSize:12,fontWeight:400,color:'var(--t3)',marginLeft:10}}>営業・人事・広報などの間接部門</span>
+      </h2>
+      <div className="tbl-wrap">
+        <table>
+          <colgroup><col className="c-proj"/><col className="c-in"/><col className="c-out"/></colgroup>
+          <thead>
+            <tr>
+              <th style={{background:'var(--fill-3)'}}>部门</th>
+              <th className="in-bg bl">IN（收入）</th>
+              <th className="out-bg bl">OUT（人件費）</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedIndirect.length===0&&(
+              <tr><td colSpan={3} style={{textAlign:'center',color:'var(--t3)',padding:'18px 0',fontSize:13}}>間接部門がありません — 下のボタンで追加</td></tr>
+            )}
+            {sortedIndirect.map((p,pi)=>{
+              const labor=calcLaborCost(p,staff);
+              const ovhd=calcOverhead(labor,ovhdRate);
+              const sub=calcSubcontractCost(p);
+              return(
+                <tr key={p.id} className={pi%2!==0?'odd':''}>
+                  {/* Pane1: 番号 + 部门名 + ステータス（設計費なし） */}
+                  <td>
+                    <div className="p1-cell">
+                      <div style={{marginBottom:5,display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                        <div className="proj-line" style={{flex:1}}>
+                          <input className="proj-no-ipt" type="text" placeholder="番号"
+                            value={p.projectNumber||''} onChange={e=>updP(p.id,x=>({...x,projectNumber:e.target.value}))}/>
+                          <input className="proj-name-ipt" type="text"
+                            value={p.name} onChange={e=>updP(p.id,x=>({...x,name:e.target.value}))}/>
+                        </div>
+                        <button onClick={()=>delProject(p.id)} title="部門削除"
+                          style={{background:'none',border:'1px solid rgba(192,48,74,.3)',color:'var(--red)',borderRadius:4,cursor:'pointer',fontSize:12,padding:'2px 7px',lineHeight:1.4}}>
+                          削除
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                  {/* Pane2: IN 収入（简易） */}
+                  <td className="bl">
+                    <div className="p2-cell">
+                      {(p.in.incomes||[]).length===0&&(
+                        <div style={{fontSize:12,color:'var(--t3)',marginBottom:6}}>暂无收入记录</div>
+                      )}
+                      {(p.in.incomes||[]).map((inc,ii)=>(
+                        <div key={ii} style={{display:'grid',gridTemplateColumns:'1fr 100px 90px auto',alignItems:'center',gap:'4px 6px',marginBottom:6}}>
+                          <input type="text" className="ipt" style={{fontSize:11,padding:'3px 6px'}}
+                            placeholder="収入内容（家賃収入・紹介料 など）"
+                            value={inc.label||''} onChange={e=>updP(p.id,x=>({...x,in:{...x.in,incomes:(x.in.incomes||[]).map((r,i)=>i===ii?{...r,label:e.target.value}:r)}}))}/>
+                          <input type="date" style={{fontSize:11,padding:'2px 4px',border:'1px solid var(--s1)',borderRadius:4,outline:'none',color:'var(--t1)',width:'100%'}}
+                            value={inc.date||''} onChange={e=>updP(p.id,x=>({...x,in:{...x.in,incomes:(x.in.incomes||[]).map((r,i)=>i===ii?{...r,date:e.target.value}:r)}}))}/>
+                          <MoneyInput style={{width:'100%',background:inc.amount>0?'rgba(26,122,88,.07)':'#fff'}}
+                            value={inc.amount||0} onChange={v=>updP(p.id,x=>({...x,in:{...x.in,incomes:(x.in.incomes||[]).map((r,i)=>i===ii?{...r,amount:v}:r)}}))
+                            }/>
+                          <button onClick={()=>updP(p.id,x=>({...x,in:{...x.in,incomes:(x.in.incomes||[]).filter((_,i)=>i!==ii)}}))}
+                            style={{background:'none',border:'none',cursor:'pointer',color:'var(--t3)',fontSize:14,lineHeight:1,padding:'0 2px'}}>×</button>
+                        </div>
+                      ))}
+                      <button className="add-btn" onClick={()=>updP(p.id,x=>({...x,in:{...x.in,incomes:[...(x.in.incomes||[]),{label:'',amount:0,date:''}]}}))}>
+                        ＋ 収入を追加
+                      </button>
+                      {(p.in.incomes||[]).some(r=>r.amount>0)&&(
+                        <div className="in-total">已收合計：<b>{fmtM(calcTotalIn(p))}</b></div>
+                      )}
+                    </div>
+                  </td>
+                  {/* Pane3: OUT（设计プロジェクトと同じ） */}
+                  <td className="bl">
+                    <div className="p3-cell">
+                      {[...(p.out.staffDays||[])].sort((a,b)=>{
+                        const ai=staff.findIndex(x=>x.id===a.staffId);
+                        const bi=staff.findIndex(x=>x.id===b.staffId);
+                        return(ai<0?999:ai)-(bi<0?999:bi);
+                      }).map(sd=>{
+                        const si=(p.out.staffDays||[]).indexOf(sd);
+                        const savedProj=(savedSnapshot?.[period]||[]).find(x=>x.id===p.id);
+                        const savedSd=(savedProj?.out?.staffDays||[]).find(x=>x.staffId===sd.staffId);
+                        return(
+                          <StaffDayRow key={si} sd={sd} si={si} pId={p.id}
+                            staff={staff} isAdmin={isAdmin}
+                            updSD={updSD} removeSD={removeSD} savedSd={savedSd}/>
+                        );
+                      })}
+                      <button className="add-btn" onClick={()=>addSD(p.id)}>＋ スタッフ追加</button>
+                      {isAdmin&&(
+                        <div className="out-total">
+                          人件費：<b>{fmtM(labor)}</b><br/>
+                          運営費（×{ovhdRate}%）：<b>{fmtM(ovhd)}</b>
+                        </div>
+                      )}
+                      {/* 設計外注費（折りたたみ） */}
+                      {(()=>{
+                        const subs=p.out.subcontracts||[];
+                        const subTotal=sub;
+                        const isOpen=openSubs.has(p.id);
+                        const updSubs=fn=>updP(p.id,x=>({...x,out:{...x.out,subcontracts:fn(x.out.subcontracts||[])}}));
+                        return(
+                          <div style={{marginTop:8,borderTop:'1px dashed var(--s2)',paddingTop:6}}>
+                            <button onClick={()=>toggleSub(p.id)}
+                              style={{background:'none',border:'none',cursor:'pointer',fontSize:11,color:subTotal>0?'#8a5000':'var(--t3)',padding:0,display:'flex',alignItems:'center',gap:4,fontWeight:subTotal>0?600:400}}>
+                              <span>{isOpen?'▼':'▶'}</span>
+                              <span>設計外注費</span>
+                              {subs.length>0&&<span style={{color:'#c07800'}}>（{subs.length}件 {fmtM(subTotal)}）</span>}
+                            </button>
+                            {isOpen&&(
+                              <div style={{marginTop:6,paddingLeft:4}}>
+                                {subs.map((sc,sci)=>(
+                                  <div key={sci} style={{display:'grid',gridTemplateColumns:'1fr 100px 90px auto',alignItems:'center',gap:'4px 6px',marginBottom:5}}>
+                                    <input type="text" className="ipt" style={{fontSize:11,padding:'3px 6px'}}
+                                      placeholder="外注内容（例：ランドスケープ）"
+                                      value={sc.label||''} onChange={e=>updSubs(s=>s.map((r,i)=>i===sci?{...r,label:e.target.value}:r))}/>
+                                    <input type="date" style={{fontSize:11,padding:'2px 4px',border:'1px solid var(--s1)',borderRadius:4,outline:'none',color:'var(--t1)',width:'100%'}}
+                                      value={sc.date||''} onChange={e=>updSubs(s=>s.map((r,i)=>i===sci?{...r,date:e.target.value}:r))}/>
+                                    <MoneyInput style={{width:'100%',background:sc.amount>0?'rgba(176,104,0,.08)':'#fff'}}
+                                      value={sc.amount||0} onChange={v=>updSubs(s=>s.map((r,i)=>i===sci?{...r,amount:v}:r))}/>
+                                    <button onClick={()=>updSubs(s=>s.filter((_,i)=>i!==sci))}
+                                      style={{background:'none',border:'none',cursor:'pointer',color:'var(--t3)',fontSize:14,lineHeight:1,padding:'0 2px'}}>×</button>
+                                  </div>
+                                ))}
+                                <button className="add-btn" style={{fontSize:10}} onClick={()=>updSubs(s=>[...s,{label:'',date:'',amount:0}])}>＋ 外注を追加</button>
+                                {subTotal>0&&<div style={{fontSize:11,color:'#8a5000',fontWeight:600,marginTop:4}}>外注合計：{fmtM(subTotal)}</div>}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <button className="add-row-btn" onClick={()=>addProject('indirect')}>＋ 間接部門を追加</button>
+
+      <hr className="divider"/>
+
+      {/* Pane 4 — staff */}
+      <h2 className="staff-h2">スタッフ管理{!isAdmin&&<span style={{fontSize:12,fontWeight:400,color:'var(--t3)',marginLeft:8}}>（管理者モードで給与設定可）</span>}</h2>
+
+      {/* workday context note */}
+      <div style={{fontSize:12,color:'var(--t3)',marginBottom:12}}>各四半期の消化日数を超えた工数は残業として計上されます</div>
+
+      {(()=>{
+        const MGMT_NAMES=['中村','小林','加藤'];
+        const isDesign  =s=>s.dept==='design'   ||(s.dept==null&&!MGMT_NAMES.includes(s.name));
+        const isMgmt    =s=>s.dept==='mgmt'||s.dept==='management'||(s.dept==null&&MGMT_NAMES.includes(s.name));
+        const designStaff=staff.filter(isDesign);
+        const mgmtStaff  =staff.filter(isMgmt);
+        const cardRow=(s)=>(
+          <StaffCard key={s.id} s={s} projects={projects} isAdmin={isAdmin} stdDaysQ={stdDaysQ}
+            upd={(sid,f,v)=>updS(sid,f,v)} del={()=>delStaff(s.id)}/>
+        );
+        return(<>
+          <div style={{marginBottom:6,fontWeight:600,fontSize:13,color:'var(--accent)',borderLeft:'3px solid var(--accent)',paddingLeft:8}}>設計部門</div>
+          <div className="staff-grid staff-section" style={{marginBottom:6}}>
+            {designStaff.map(cardRow)}
+          </div>
+          <button className="add-btn no-print" style={{marginBottom:22,fontSize:12,padding:'5px 14px'}} onClick={()=>addStaff('design')}>＋ 設計部門スタッフを追加</button>
+          <div style={{marginBottom:6,fontWeight:600,fontSize:13,color:'#8a5000',borderLeft:'3px solid #8a5000',paddingLeft:8}}>管理部門</div>
+          <div className="staff-grid staff-section" style={{marginBottom:6}}>
+            {mgmtStaff.map(cardRow)}
+          </div>
+          <button className="add-btn no-print" style={{marginBottom:8,fontSize:12,padding:'5px 14px'}} onClick={()=>addStaff('management')}>＋ 管理部門スタッフを追加</button>
+        </>);
+      })()}
+
+      {/* charts — admin only */}
+      {isAdmin&&<>
+        <hr className="divider"/>
+        <div className="charts-grid">
+          <div>
+            <h2>IN / OUT 比較</h2>
+            <BC height={230} categories={sortedProjects.map(p=>p.name)}
+              series={[
+                {label:'入金済',data:sortedProjects.map(p=>calcTotalIn(p)),color:'rgba(26,122,88,.75)'},
+                {label:'支出合計',data:sortedProjects.map(p=>calcTotalOut(p,staff,ovhdRate)),color:'rgba(192,48,74,.7)'},
+              ]}/>
+          </div>
+          <div>
+            <h2>人件費 — スタッフ別内訳</h2>
+            <BC height={230} categories={sortedProjects.map(p=>p.name)} stacked
+              series={staffWithData.map((s,i)=>({
+                label:s.name,
+                data:sortedProjects.map(p=>{const sd=p.out.staffDays.find(x=>x.staffId===s.id);return sd?(sd.days||0)*getDailyRate(s):0;}),
+                color:PIE_COLORS[i%PIE_COLORS.length],
+              }))}/>
+          </div>
+        </div>
+      </>}
+
+      <div className="footer-note">
+        {period}年度　·　更改后须点击「保存」才写入服务器　·　运营费 = 人件費 × {ovhdRate}%
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

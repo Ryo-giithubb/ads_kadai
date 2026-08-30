@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>建築設計事務所 収支ダッシュボード — 図解資料</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#fbfbfa; --card:#fff;
+    --ink:#1c1c1c; --t1:rgba(20,20,20,.9); --t2:rgba(20,20,20,.56); --t3:rgba(20,20,20,.36);
+    --line:rgba(20,20,20,.1); --line2:rgba(20,20,20,.16);
+    --accent:#2e76ab; --accent-bg:rgba(46,118,171,.09);
+    --green:#1a7a58; --green-bg:rgba(26,122,88,.1);
+    --red:#c0304a; --red-bg:rgba(192,48,74,.08);
+    --amber:#b06800; --amber-bg:rgba(176,104,0,.1);
+    --purple:#5b3cb4; --purple-bg:rgba(91,60,180,.08);
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Segoe UI",sans-serif;line-height:1.7;font-size:15px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  section{padding:54px 0}
+  .eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-bg);padding:5px 12px;border-radius:999px;margin-bottom:16px}
+  h1{font-size:clamp(28px,5vw,46px);font-weight:800;line-height:1.18;letter-spacing:-.01em}
+  h2{font-size:clamp(22px,3.4vw,30px);font-weight:780;letter-spacing:-.01em;margin-bottom:8px}
+  h3{font-size:17px;font-weight:700}
+  .lead{font-size:clamp(15px,2vw,18px);color:var(--t2);max-width:62ch}
+  .muted{color:var(--t2)}
+  .small{font-size:13px}
+  .sec-head{margin-bottom:30px}
+
+  /* hero */
+  .hero{background:linear-gradient(160deg,#ffffff 0%, #f3f7fb 100%);border-bottom:1px solid var(--line)}
+  .hero-inner{padding:64px 0 56px}
+  .hero h1{margin-bottom:18px}
+  .hero h1 .hl{color:var(--accent)}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+  .chip{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:8px 13px;font-size:13px;font-weight:600;color:var(--t1)}
+  .chip svg{flex-shrink:0}
+
+  /* generic cards */
+  .grid{display:grid;gap:18px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+  .card h3{margin-bottom:7px;display:flex;align-items:center;gap:10px}
+  .card p{font-size:14px;color:var(--t2)}
+  .icon-badge{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .ib-accent{background:var(--accent-bg);color:var(--accent)}
+  .ib-green{background:var(--green-bg);color:var(--green)}
+  .ib-red{background:var(--red-bg);color:var(--red)}
+  .ib-amber{background:var(--amber-bg);color:var(--amber)}
+  .ib-purple{background:var(--purple-bg);color:var(--purple)}
+
+  /* problem -> solution */
+  .ps{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:stretch}
+  .ps-arrow{display:flex;align-items:center;justify-content:center;color:var(--t3)}
+  .panel{border-radius:14px;padding:22px}
+  .panel.prob{background:var(--red-bg);border:1px solid rgba(192,48,74,.2)}
+  .panel.sol{background:var(--green-bg);border:1px solid rgba(26,122,88,.22)}
+  .panel h3{margin-bottom:14px}
+  .li{display:flex;gap:10px;align-items:flex-start;margin-bottom:11px;font-size:14px}
+  .li:last-child{margin-bottom:0}
+  .li .dot{flex-shrink:0;margin-top:3px}
+
+  /* screen map */
+  .screen{background:var(--card);border:1px solid var(--line2);border-radius:16px;overflow:hidden;box-shadow:0 18px 40px -28px rgba(20,40,80,.35)}
+  .screen-bar{display:flex;align-items:center;gap:8px;padding:11px 16px;background:#f4f6f8;border-bottom:1px solid var(--line)}
+  .tl{width:11px;height:11px;border-radius:50%}
+  .screen-body{padding:20px}
+  .mock-mode{display:flex;justify-content:space-between;align-items:center;background:var(--accent-bg);border:1px solid rgba(46,118,171,.3);color:var(--accent);border-radius:8px;padding:8px 13px;font-size:12.5px;font-weight:600;margin-bottom:14px}
+  .mock-mode .btn{background:var(--accent);color:#fff;border-radius:5px;padding:4px 11px;font-size:11.5px}
+  .mock-h{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .mock-h .t{font-size:17px;font-weight:800}
+  .mock-h .tools{display:flex;gap:6px}
+  .mock-pill{font-size:11px;border:1px solid var(--line2);border-radius:6px;padding:4px 9px;color:var(--t2);background:#fff}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px}
+  .kpi{border:1px solid var(--line);border-radius:9px;padding:11px 12px}
+  .kpi .v{font-size:16px;font-weight:750}
+  .kpi .l{font-size:10.5px;color:var(--t2);margin-top:2px}
+  .kpi.green .v{color:var(--green)} .kpi.red .v{color:var(--red)} .kpi.accent .v{color:var(--accent)}
+  .mock-tbl{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:4px}
+  .mock-tbl th{text-align:left;padding:6px 9px;font-size:10.5px;color:var(--t2);border-bottom:2px solid var(--line2)}
+  .mock-tbl th.in{background:var(--green-bg);color:var(--green)}
+  .mock-tbl th.out{background:var(--red-bg);color:var(--red)}
+  .mock-tbl td{padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+  .mock-tbl .pj{font-weight:700}
+  .tag{display:inline-block;font-size:10px;border-radius:999px;padding:1px 8px;font-weight:600}
+  .tag.g{background:var(--green-bg);color:var(--green)} .tag.n{background:rgba(20,20,20,.06);color:var(--t2)} .tag.a{background:var(--amber-bg);color:var(--amber)}
+
+  /* role division */
+  .roles{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:stretch;margin-bottom:26px}
+  .role-col{border-radius:14px;padding:20px}
+  .role-col.staff{background:var(--accent-bg);border:1px solid rgba(46,118,171,.3)}
+  .role-col.admin{background:var(--green-bg);border:1px solid rgba(26,122,88,.28)}
+  .role-head{font-size:16px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .role-col.staff .role-head{color:var(--accent)} .role-col.admin .role-head{color:var(--green)}
+  .role-who{font-size:11.5px;font-weight:700;display:inline-block;border-radius:999px;padding:3px 11px;margin-bottom:12px}
+  .role-col.staff .role-who{background:rgba(46,118,171,.16);color:var(--accent)}
+  .role-col.admin .role-who{background:rgba(26,122,88,.16);color:var(--green)}
+  .role-col .d{font-size:13.5px;color:var(--t2);margin-bottom:12px}
+  .role-li{display:flex;gap:8px;font-size:13px;margin-bottom:7px;align-items:flex-start;color:var(--t1)}
+  .role-li .ck{flex-shrink:0;margin-top:1px;font-weight:800}
+  .role-col.staff .role-li .ck{color:var(--accent)} .role-col.admin .role-li .ck{color:var(--green)}
+  .vs{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:var(--t3);font-size:11px;font-weight:700;text-align:center;line-height:1.4}
+  .vs .ring{width:46px;height:46px;border-radius:50%;border:2px dashed var(--line2);display:flex;align-items:center;justify-content:center;color:var(--t2)}
+
+  /* dual mini screens */
+  .screens2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .ms{background:var(--card);border:1px solid var(--line2);border-radius:14px;overflow:hidden;box-shadow:0 14px 32px -26px rgba(20,40,80,.4)}
+  .ms-cap{font-size:12.5px;font-weight:800;padding:9px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px}
+  .ms-cap.staff{background:rgba(46,118,171,.08);color:var(--accent)}
+  .ms-cap.admin{background:rgba(26,122,88,.08);color:var(--green)}
+  .ms-body{padding:14px}
+  .ms-mode{font-size:11px;font-weight:600;border-radius:6px;padding:6px 10px;margin-bottom:11px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+  .ms-mode.staff{background:var(--accent-bg);border:1px solid rgba(46,118,171,.3);color:var(--accent)}
+  .ms-mode.admin{background:var(--green-bg);border:1px solid rgba(26,122,88,.3);color:var(--green)}
+  .ms-mode .b{font-size:9.5px;border-radius:4px;padding:2px 7px;color:#fff;white-space:nowrap}
+  .ms-mode.staff .b{background:var(--accent)} .ms-mode.admin .b{background:var(--green)}
+  .ms-kpi{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+  .ms-kpi .c{border:1px solid var(--line);border-radius:7px;padding:7px 8px}
+  .ms-kpi .v{font-size:12px;font-weight:750} .ms-kpi .l{font-size:9px;color:var(--t2);margin-top:1px}
+  .ms-kpi .green{color:var(--green)} .ms-kpi .red{color:var(--red)}
+  .ms-hide{background:repeating-linear-gradient(45deg,#f2f3f1,#f2f3f1 6px,rgba(0,0,0,.035) 6px,rgba(0,0,0,.035) 12px);border:1px dashed var(--line2);border-radius:8px;padding:13px 10px;text-align:center;font-size:11px;color:var(--t2);margin-bottom:10px;font-weight:600}
+  .ms-tbl{width:100%;border-collapse:collapse;font-size:10.5px}
+  .ms-tbl th{font-size:9px;text-align:left;padding:4px 6px;border-bottom:1.5px solid var(--line2);color:var(--t2)}
+  .ms-tbl th.in{background:var(--green-bg);color:var(--green)} .ms-tbl th.out{background:var(--red-bg);color:var(--red)}
+  .ms-tbl td{padding:6px;border-bottom:1px solid var(--line);vertical-align:top}
+  .ms-pj{font-weight:700;font-size:10.5px}
+  .dchip{display:inline-block;font-size:9.5px;font-weight:700;background:var(--accent-bg);color:var(--accent);border:1px solid rgba(46,118,171,.3);border-radius:5px;padding:1px 5px;margin:1px 2px 1px 0;white-space:nowrap}
+  .yen{font-weight:700;color:var(--red)}
+  .lock{font-size:9.5px;color:var(--t3);background:#f2f3f1;border-radius:4px;padding:1px 6px;display:inline-block}
+  .ms-note{font-size:10.5px;color:var(--t2);margin-top:10px;padding-top:9px;border-top:1px dashed var(--line);display:flex;gap:6px;align-items:flex-start}
+  @media(max-width:780px){
+    .roles{grid-template-columns:1fr}
+    .vs{transform:rotate(90deg);padding:4px 0}
+    .screens2{grid-template-columns:1fr}
+  }
+
+  /* annotated feature list */
+  .anno{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:26px}
+  .anno .card{padding:18px}
+  .anno h3{font-size:15px}
+  .num{width:26px;height:26px;border-radius:8px;background:var(--ink);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+  /* logic / flow */
+  .flow{display:flex;align-items:stretch;flex-wrap:wrap;gap:10px;margin-top:6px}
+  .node{flex:1;min-width:120px;background:#fff;border:1px solid var(--line2);border-radius:11px;padding:13px 14px}
+  .node .lab{font-size:11px;color:var(--t3);font-weight:600;margin-bottom:3px}
+  .node .big{font-size:15px;font-weight:750}
+  .farrow{display:flex;align-items:center;color:var(--t3);font-size:20px;font-weight:700}
+  .formula{font-family:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;background:#0e1726;color:#e8eef7;border-radius:10px;padding:14px 16px;overflow-x:auto;line-height:1.9}
+  .formula .g{color:#5fd0a0} .formula .r{color:#ff8aa0} .formula .a{color:#74b6ee} .formula .y{color:#f3c267} .formula .c{color:#7d8aa0}
+  .logic-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:18px}
+  .logic-card .head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .logic-card p{font-size:14px;color:var(--t2);margin-bottom:14px}
+
+  .convert{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .convert .box{background:var(--accent-bg);border:1px solid rgba(46,118,171,.3);border-radius:10px;padding:10px 16px;font-weight:750;color:var(--accent);font-size:15px}
+  .convert .eq{font-size:20px;font-weight:700;color:var(--t3)}
+
+  .qbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px}
+  .qcell{border:1px solid var(--line);border-radius:9px;padding:10px;text-align:center}
+  .qcell .q{font-size:12px;font-weight:800}
+  .qcell .d{font-size:11px;color:var(--t2);margin-top:3px}
+  .q1{color:var(--accent)} .q2{color:var(--green)} .q3{color:var(--amber)} .q4{color:var(--red)}
+
+  /* productivity bar demo */
+  .pb-demo{margin-top:8px}
+  .pb-track{height:11px;background:var(--line);border-radius:6px;position:relative;margin:6px 0}
+  .pb-fill{height:100%;border-radius:6px}
+  .pb-mark{position:absolute;top:-3px;bottom:-3px;width:2px;background:rgba(20,20,20,.35);left:20%}
+  .pb-row{display:flex;justify-content:space-between;font-size:12px}
+
+  /* tech stack */
+  .stack{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+  .tech{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:9px 14px;font-size:13.5px;font-weight:600}
+
+  footer{border-top:1px solid var(--line);padding:34px 0 50px;color:var(--t2);font-size:13px}
+  .divider-num{font-size:13px;font-weight:800;color:var(--accent);letter-spacing:.1em}
+
+  @media(max-width:780px){
+    .g3,.g2,.kpis,.anno,.qbar{grid-template-columns:1fr 1fr}
+    .ps{grid-template-columns:1fr}
+    .ps-arrow{transform:rotate(90deg);padding:4px 0}
+    .kpis{grid-template-columns:1fr 1fr}
+  }
+  @media(max-width:520px){
+    .g3,.g2,.anno{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="wrap hero-inner">
+    <span class="eyebrow">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+      AI-Driven School ／ 月次課題 第3回 提出物
+    </span>
+    <h1>建築設計事務所<br/><span class="hl">収支ダッシュボード</span></h1>
+    <p class="lead">スタッフの「時間」、「給料」、プロジェクトの「入金状況」を、経営者がひと目で把握できる収支管理ツール。自分の設計事務所の実運用を想定し、ひな形からゼロベースで作り込みました。</p>
+    <div class="meta-row">
+      <span class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>単一HTMLで完結</span>
+      <span class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>スタッフ／管理者 2モード</span>
+      <span class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>四半期 P&amp;L 自動集計</span>
+      <span class="chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 12V2a10 10 0 0 1 10 10z"/></svg>スタッフ別 生産性分析</span>
+    </div>
+  </div>
+</header>
+
+<!-- ===== 1. なぜ作ったか ===== -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="divider-num">01 — BACKGROUND</div>
+      <h2>なぜ作ったか</h2>
+      <p class="lead">設計事務所では「だれが・どのプロジェクトに・何日働き」「いくら入金され」「利益が出ているか」がバラバラの場所にあり、経営判断が後手に回りがち。これを1画面に統合しました。</p>
+    </div>
+    <div class="ps">
+      <div class="panel prob">
+        <h3><span class="icon-badge ib-red"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></span>これまでの課題</h3>
+        <div class="li"><span class="dot">🕒</span><div>スタッフの稼働日数が表計算に散在し、誰が忙しいか見えない</div></div>
+        <div class="li"><span class="dot">💴</span><div>給与・賞与から「1日あたりの人件費」を都度手計算していた</div></div>
+        <div class="li"><span class="dot">📥</span><div>契約額と実際の入金が一致せず、回収状況が追えない</div></div>
+        <div class="li"><span class="dot">📉</span><div>プロジェクト単位の粗利が締めるまで分からない</div></div>
+      </div>
+      <div class="ps-arrow">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </div>
+      <div class="panel sol">
+        <h3><span class="icon-badge ib-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg></span>このツールで解決</h3>
+        <div class="li"><span class="dot">✅</span><div>工数を週次で積み上げ、Q別・スタッフ別に自動集計</div></div>
+        <div class="li"><span class="dot">✅</span><div>給与改定にも対応した日給レートを自動算出</div></div>
+        <div class="li"><span class="dot">✅</span><div>契約額／実収額を分けて管理し、回収率が一目瞭然</div></div>
+        <div class="li"><span class="dot">✅</span><div>粗利・生産性をリアルタイム表示で経営判断を即断</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 2. 画面構成 ===== -->
+<section style="background:#f3f6f9;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="divider-num">02 — 2-MODE & 役割分担</div>
+      <h2>2モード設計 — 役割分担で効率化</h2>
+      <p class="lead">同じ画面を<b>スタッフモード</b>と<b>管理者モード</b>に分離。日々の入力は現場のスタッフに任せ、所長はその結果をチェックして経営判断に集中。<b>入力する人と判断する人で役割を分ける</b>ことで、転記やとりまとめの手間をなくしました。</p>
+    </div>
+
+    <!-- role division -->
+    <div class="roles">
+      <div class="role-col staff">
+        <div class="role-head"><span>👤</span> スタッフモード</div>
+        <span class="role-who">担当：現場のスタッフ全員</span>
+        <div class="d">毎週、自分が動いた<b>日数だけ</b>を入力。給与・人件費・粗利などの金額は見えないので、安心して全員が触れます。</div>
+        <div class="role-li"><span class="ck">✓</span><div>プロジェクトごとに「今週◯日」を記録</div></div>
+        <div class="role-li"><span class="ck">✓</span><div>機密の金額は非表示＝心理的ハードルが低い</div></div>
+        <div class="role-li"><span class="ck">✓</span><div>入力は分散、所長の作業を肩代わり</div></div>
+      </div>
+      <div class="vs">
+        <div class="ring">⇄</div>
+        <div>役割分担<br/>で効率化</div>
+      </div>
+      <div class="role-col admin">
+        <div class="role-head"><span>🔓</span> 管理者モード（PIN）</div>
+        <span class="role-who">担当：所長（経営者）</span>
+        <div class="d">PINで解除すると金額がすべて出現。スタッフの入力を<b>チェック</b>し、人件費・粗利・生産性から経営判断を下します。</div>
+        <div class="role-li"><span class="ck">✓</span><div>入力済みの工数を確認・承認</div></div>
+        <div class="role-li"><span class="ck">✓</span><div>給与・日給・粗利・生産性を一覧で把握</div></div>
+        <div class="role-li"><span class="ck">✓</span><div>集計・転記はゼロ、判断だけに集中</div></div>
+      </div>
+    </div>
+
+    <p class="lead" style="margin-bottom:16px;font-size:15px"><b>同じ画面でも、見えるデータは全く別物。</b>左がスタッフ、右が管理者の画面イメージです。</p>
+
+    <div class="screens2">
+      <!-- STAFF screen -->
+      <div class="ms">
+        <div class="ms-cap staff"><span>👤</span> スタッフモードの画面</div>
+        <div class="ms-body">
+          <div class="ms-mode staff"><span>👤 工数（日数）のみ入力可</span><span class="b">管理者モードに切替</span></div>
+          <div class="ms-hide">💴 サマリーKPI（入金・人件費・粗利）は&nbsp;<u>非表示</u></div>
+          <table class="ms-tbl">
+            <thead><tr><th style="width:42%">プロジェクト</th><th class="in" style="width:24%">IN</th><th class="out" style="width:34%">OUT（工数入力）</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="ms-pj">青山邸リノベ</div><span class="tag a">進行中</span></td>
+                <td><span class="small">入金 63%</span></td>
+                <td><span class="dchip">Q1 5日</span><span class="dchip">Q2 3日</span><br/><span class="small muted">記録週 2026-05-12 ＋</span></td>
+              </tr>
+              <tr>
+                <td><div class="ms-pj">クレアホームズ</div><span class="tag a">進行中</span></td>
+                <td><span class="small">入金 40%</span></td>
+                <td><span class="dchip">Q1 10日</span><span class="dchip">Q2 8日</span><br/><span class="lock">人件費 🔒</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="ms-note"><span>👀</span><div>スタッフが見るのは<b>自分の工数と入金状況だけ</b>。金額（給与・人件費・粗利）には鍵がかかっています。</div></div>
+        </div>
+      </div>
+
+      <!-- ADMIN screen -->
+      <div class="ms">
+        <div class="ms-cap admin"><span>🔓</span> 管理者モードの画面</div>
+        <div class="ms-body">
+          <div class="ms-mode admin"><span>🔓 給与・収支データを表示中</span><span class="b">スタッフモードに戻る</span></div>
+          <div class="ms-kpi">
+            <div class="c"><div class="v green">¥60,370,000</div><div class="l">入金合計</div></div>
+            <div class="c"><div class="v red">¥5,343,750</div><div class="l">人件費合計</div></div>
+            <div class="c"><div class="v red">¥2,137,500</div><div class="l">運営費（×40%）</div></div>
+            <div class="c"><div class="v green">+¥42,968,750</div><div class="l">粗利</div></div>
+          </div>
+          <table class="ms-tbl">
+            <thead><tr><th style="width:42%">プロジェクト</th><th class="in" style="width:24%">IN</th><th class="out" style="width:34%">OUT（人件費）</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="ms-pj">青山邸リノベ</div><span class="tag a">進行中</span></td>
+                <td><span class="small">実収<br/>¥13,200,000</span></td>
+                <td><span class="small">5日×日給…<br/><span class="yen">¥1,125,667</span></span></td>
+              </tr>
+              <tr>
+                <td><div class="ms-pj">クレアホームズ</div><span class="tag a">進行中</span></td>
+                <td><span class="small">実収<br/>¥15,400,000</span></td>
+                <td><span class="small">生産性 2.34×<br/><span class="yen">¥1,318,167</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="ms-note"><span>📊</span><div>所長は<b>金額・粗利・生産性まで全部</b>を確認。スタッフの入力日数がそのまま人件費に反映されます。</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- annotated features -->
+    <h3 style="margin:38px 0 4px">画面構成と主な機能</h3>
+    <p class="muted small" style="margin-bottom:18px">1ページに「サマリーKPI → 四半期P&amp;L → プロジェクト収支表 → スタッフ別カード」を縦に配置しています。</p>
+    <div class="anno">
+      <div class="card">
+        <h3><span class="num">1</span> 2モード切替（PIN保護）</h3>
+        <p>普段は<b>スタッフモード</b>で工数（日数）のみ入力。管理者がPINを入力すると<b>管理者モード</b>になり、給与・日給・粗利などの金額が表示されます。誰でも開けるが機密は守る設計。</p>
+      </div>
+      <div class="card">
+        <h3><span class="num">2</span> サマリーKPIカード</h3>
+        <p>入金合計／人件費／運営費／<b>粗利</b>に加え、<b>一人あたり生産性</b>・設計vs管理部門の人件費比率・社内留保資金まで、経営指標を上部に集約。</p>
+      </div>
+      <div class="card">
+        <h3><span class="num">3</span> 四半期 P&amp;L 表</h3>
+        <p>入金済・人件費・運営費・外注費・粗利を<b>Q1〜Q4</b>で自動集計。季節変動や資金繰りのヤマが見えます。</p>
+      </div>
+      <div class="card">
+        <h3><span class="num">4</span> プロジェクト収支テーブル</h3>
+        <p>左に案件、中央に<b>IN（契約額・分割入金・回収率）</b>、右に<b>OUT（スタッフ工数・人件費・外注費）</b>を並列表示。ステータスで絞り込み・折りたたみも可能。</p>
+      </div>
+      <div class="card">
+        <h3><span class="num">5</span> スタッフ別 生産性カード</h3>
+        <p>一人ひとりの<b>プロジェクト配分（ドーナツグラフ）</b>、年収・日給、残業日数、そして<b>生産性（投入コストに対する稼ぎ）</b>をバーで可視化。</p>
+      </div>
+      <div class="card">
+        <h3><span class="num">6</span> 年度管理・保存・出力</h3>
+        <p>年度をワンクリック追加（前年案件を引き継ぎ工数リセット）。データは<b>ブラウザに保存</b>、<b>JSON書き出し／読み込み</b>、<b>A4でPDF出力</b>に対応。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 3. 設計の工夫・ロジック ===== -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="divider-num">03 — DESIGN LOGIC</div>
+      <h2>設計の工夫・ロジック</h2>
+      <p class="lead">「経営者がメンテしやすく、入力が破綻しない」ことを最優先に、計算ロジックを工夫しました。</p>
+    </div>
+
+    <!-- 工数単位 -->
+    <div class="logic-card">
+      <div class="head"><span class="icon-badge ib-accent"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><h3>① 工数は「日数」を直接入力（0.5日刻み）</h3></div>
+      <p>稼働を「1日」「0.5日」と<b>日数そのまま</b>で入力。専門知識のいらない直感的な単位にしたので、誰でも迷わず記録できます。週次で「今週は3日」と足していく方式なので、入力ミスが起きにくく後からの修正も簡単です。</p>
+      <div class="convert">
+        <span class="box">0.5 日</span><span class="eq">＝</span><span class="box">半日</span>
+        <span class="eq" style="margin:0 4px">／</span>
+        <span class="box">1 日</span><span class="eq">＋</span><span class="box">1 日</span><span class="eq">＝</span><span class="box">2.0 日</span>
+      </div>
+    </div>
+
+    <!-- 日付→Q自動 + Q別レート -->
+    <div class="logic-card">
+      <div class="head"><span class="icon-badge ib-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><h3>② 日付から四半期を自動判定 → Q別の日給レートで積算</h3></div>
+      <p>記録した「週の日付」から自動でQ1〜Q4に振り分け。給与改定があっても、各四半期の代表月の基本給を使って正しい日給レートで人件費を計算します。</p>
+      <div class="flow">
+        <div class="node"><div class="lab">入力</div><div class="big">2026-05-10</div></div>
+        <div class="farrow">→</div>
+        <div class="node"><div class="lab">自動判定</div><div class="big q2">Q2（4〜6月）</div></div>
+        <div class="farrow">→</div>
+        <div class="node"><div class="lab">適用レート</div><div class="big">5月の基本給で<br/>日給を算出</div></div>
+      </div>
+      <div class="qbar">
+        <div class="qcell"><div class="q q1">Q1</div><div class="d">1〜3月 / 65日</div></div>
+        <div class="qcell"><div class="q q2">Q2</div><div class="d">4〜6月 / 65日</div></div>
+        <div class="qcell"><div class="q q3">Q3</div><div class="d">7〜9月 / 65日</div></div>
+        <div class="qcell"><div class="q q4">Q4</div><div class="d">10〜12月 / 66日</div></div>
+      </div>
+    </div>
+
+    <!-- 粗利の式 -->
+    <div class="logic-card">
+      <div class="head"><span class="icon-badge ib-red"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><h3>③ 粗利の計算式（リアルタイム）</h3></div>
+      <p>運営費は人件費に対する係数（デフォルト40%）で自動算出。すべての入力が即座に粗利へ反映されます。</p>
+      <div class="formula">
+<span class="g">粗利</span> = <span class="g">入金済</span> − <span class="r">人件費</span> − <span class="r">運営費</span><span class="c">（= 人件費 × 40%）</span> − <span class="y">設計外注費</span>
+      </div>
+    </div>
+
+    <!-- 生産性 -->
+    <div class="logic-card">
+      <div class="head"><span class="icon-badge ib-purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7"/><rect x="12" y="6" width="3" height="11"/><rect x="17" y="13" width="3" height="4"/></svg></span><h3>④ スタッフ別「生産性」を見える化</h3></div>
+      <p>各プロジェクトの入金額を工数比で按分し、その人に「投入したコスト」と比較。<b>1.0×が損益分岐</b>、それ以上なら稼ぎ頭です。予定（契約ベース）と実績（実収ベース）の両方を表示。</p>
+      <div class="formula" style="margin-bottom:16px">
+<span class="a">生産性（倍率）</span> = <span class="g">実収按分額</span> ÷ <span class="r">投入コスト</span><span class="c">（= 工数日数 × 日給レート）</span>
+      </div>
+      <div class="pb-demo">
+        <div class="pb-row"><span><b>佐藤</b> <span class="muted">実績生産性</span></span><span style="color:var(--green);font-weight:700">2.34×</span></div>
+        <div class="pb-track"><div class="pb-fill" style="width:47%;background:var(--green)"></div><div class="pb-mark" title="損益分岐 1×"></div></div>
+        <div class="pb-row small muted"><span>0×</span><span style="margin-left:auto">↑ 1× = 損益分岐</span></div>
+      </div>
+    </div>
+
+    <!-- カレンダー自動 + 保存 -->
+    <div class="grid g2">
+      <div class="card">
+        <h3><span class="icon-badge ib-amber"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 16l2 2 4-4"/></svg></span> 法定営業日を自動集計</h3>
+        <p>カレンダーから月〜金を数え、各Qの消化済み営業日を自動計算。進捗バーで「Q2は残り◯日」が一目で分かります。</p>
+      </div>
+      <div class="card">
+        <h3><span class="icon-badge ib-accent"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg></span> 保存・バックアップ</h3>
+        <p>入力はブラウザ（localStorage）に保存。JSONで書き出し／読み込みでき、PCを変えてもデータを引き継げます。会社の実データ・NASとは完全に切り離した提出用デモ構成。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 4. 技術スタック ===== -->
+<section style="background:#0e1726;color:#e8eef7">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="divider-num" style="color:#74b6ee">04 — TECH</div>
+      <h2 style="color:#fff">技術スタック</h2>
+      <p class="lead" style="color:#aab6c8">外部ビルド不要・1ファイルで動く構成。ダブルクリックで開け、誰のPCでもすぐ使えることを重視しました。</p>
+    </div>
+    <div class="stack">
+      <span class="tech" style="background:#16233a;border-color:#27344d;color:#e8eef7">⚛️ React 18</span>
+      <span class="tech" style="background:#16233a;border-color:#27344d;color:#e8eef7">📊 Chart.js 4</span>
+      <span class="tech" style="background:#16233a;border-color:#27344d;color:#e8eef7">🔧 Babel Standalone</span>
+      <span class="tech" style="background:#16233a;border-color:#27344d;color:#e8eef7">💾 localStorage</span>
+      <span class="tech" style="background:#16233a;border-color:#27344d;color:#e8eef7">📄 単一HTMLファイル</span>
+      <span class="tech" style="background:#16233a;border-color:#27344d;color:#e8eef7">🖨 印刷CSS（A4 PDF）</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <b>建築設計事務所 収支ダッシュボード</b> — AI-Driven School 月次課題 第3回 図解資料<br/>
+    <span class="muted">提出用デモ（架空データ）。会社の実データ・NASとは接続していません。</span>
+  </div>
+</footer>
+
+</body>
+</html>
