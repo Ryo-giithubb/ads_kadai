@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>実寸パンチングスタジオ</title>
+<style>
+  :root {
+    --bg: #eef0f3;
+    --panel: #ffffff;
+    --panel-border: #d8dce2;
+    --ink: #1a1d22;
+    --muted: #5b6572;
+    --accent: #2657c7;
+    --accent-ink: #ffffff;
+    --accent-soft: #dce6fb;
+    --warn: #b5690a;
+    --warn-soft: #fbecd8;
+    --metal-a: #d7dade;
+    --metal-b: #b7bcc3;
+    --metal-edge: #8b909a;
+    --void: #10131a;
+    --nameplate: #20242b;
+    --nameplate-ink: #eef0f3;
+    --nameplate-accent: #7fa8ff;
+    --ruler: #aeb4bd;
+    --font-ui: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP", "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171b;
+      --panel: #1c2026;
+      --panel-border: #2b3038;
+      --ink: #e7e9ec;
+      --muted: #8b94a3;
+      --accent: #5b8def;
+      --accent-ink: #0d1420;
+      --accent-soft: #20304f;
+      --warn: #e2a94c;
+      --warn-soft: #3a2c14;
+      --metal-a: #3f444c;
+      --metal-b: #2b2f36;
+      --metal-edge: #171a1f;
+      --void: #0a0b0d;
+      --ruler: #454b54;
+      --logo-bg: #fff;
+      --logo-pad: 4px 10px;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14171b; --panel: #1c2026; --panel-border: #2b3038; --ink: #e7e9ec; --muted: #8b94a3;
+    --accent: #5b8def; --accent-ink: #0d1420; --accent-soft: #20304f; --warn: #e2a94c; --warn-soft: #3a2c14;
+    --metal-a: #3f444c; --metal-b: #2b2f36; --metal-edge: #171a1f; --void: #0a0b0d; --ruler: #454b54;
+    --logo-bg: #fff; --logo-pad: 4px 10px;
+  }
+  :root[data-theme="light"] {
+    --bg: #eef0f3; --panel: #ffffff; --panel-border: #d8dce2; --ink: #1a1d22; --muted: #5b6572;
+    --accent: #2657c7; --accent-ink: #ffffff; --accent-soft: #dce6fb; --warn: #b5690a; --warn-soft: #fbecd8;
+    --metal-a: #d7dade; --metal-b: #b7bcc3; --metal-edge: #8b909a; --void: #10131a; --ruler: #aeb4bd;
+    --logo-bg: transparent; --logo-pad: 0;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  ::selection { background: var(--accent-soft); }
+
+  .app {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "header header"
+      "sidebar stage";
+    min-height: 100vh;
+    gap: 1px;
+  }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; grid-template-areas: "header" "sidebar" "stage"; }
+  }
+
+  header {
+    grid-area: header;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--panel-border);
+    background: var(--panel);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-size: 17px;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+  }
+  .page-brand {
+    margin-top: 18px;
+    display: flex;
+    justify-content: flex-start;
+  }
+  .page-brand-logo {
+    height: 22px;
+    width: auto;
+    display: block;
+    background: var(--logo-bg, transparent);
+    padding: var(--logo-pad, 0);
+    border-radius: 6px;
+  }
+  header .tagline {
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+
+  .sidebar {
+    grid-area: sidebar;
+    background: var(--panel);
+    border-right: 1px solid var(--panel-border);
+    padding: 18px 18px 32px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  legend {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 0 0 6px;
+    margin: 0;
+  }
+
+  .pill-row {
+    display: grid;
+    gap: 6px;
+  }
+  .pill-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .pill-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .pill-row.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .pill-row.cols-4 label { padding: 6px 4px; font-size: 12px; }
+
+  .pill {
+    position: relative;
+  }
+  .pill input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    cursor: pointer;
+  }
+  .pill label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 6px 7px;
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 11.5px;
+    color: var(--muted);
+    text-align: center;
+    transition: border-color .12s, color .12s, background .12s;
+  }
+  .pill input:checked + label {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .pill input:focus-visible + label {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .pill svg { width: 34px; height: 22px; display: block; }
+  .pill svg circle, .pill svg ellipse, .pill svg polygon, .pill svg rect.hole { fill: currentColor; }
+  .pill svg rect.plate { fill: none; stroke: currentColor; stroke-width: 1; opacity: .35; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .field-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .field-label b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .field-label .val {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  .num-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+    height: 4px;
+  }
+  input[type="number"], select {
+    width: 76px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    border: 1px solid var(--panel-border);
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  select { width: 100%; font-family: var(--font-ui); }
+  input[type="number"]:focus-visible, select:focus-visible, input[type="range"]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .checkbox-row input { accent-color: var(--accent); }
+
+  .warn-box {
+    display: none;
+    font-size: 11.5px;
+    color: var(--warn);
+    background: var(--warn-soft);
+    border-radius: 6px;
+    padding: 6px 8px;
+  }
+  .warn-box.show { display: block; }
+
+  .calib-note { font-size: 11.5px; color: var(--muted); }
+  .calib-ruler {
+    height: 30px;
+    position: relative;
+    background: var(--bg);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .calib-ruler .bar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--accent);
+    opacity: .18;
+    border-right: 2px solid var(--accent);
+  }
+  .calib-ruler .ticks {
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(to right, var(--ruler) 0 1px, transparent 1px 10px);
+  }
+  .calib-ruler .label {
+    position: absolute;
+    right: 6px; top: 50%; transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  button.reset-btn {
+    align-self: flex-start;
+    font-size: 11.5px;
+    color: var(--accent);
+    background: none;
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    padding: 4px 9px;
+    cursor: pointer;
+  }
+  button.reset-btn:hover { background: var(--accent-soft); }
+
+  .stage {
+    grid-area: stage;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .stage-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--panel-border);
+    flex-wrap: wrap;
+  }
+  .stage-toolbar .name {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--muted);
+    letter-spacing: .01em;
+  }
+  .stage-viewport {
+    flex: 1;
+    overflow: auto;
+    padding: 28px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    min-height: 0;
+  }
+  .ruled-frame {
+    position: relative;
+    flex: none;
+  }
+  .toolbar-btn {
+    font-family: var(--font-ui);
+    font-size: 11.5px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-left: auto;
+  }
+  .toolbar-btn + .toolbar-btn { margin-left: 0; }
+  .toolbar-btn:hover { filter: brightness(0.97); }
+  .toolbar-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .plate-shadow {
+    box-shadow: 0 1px 2px rgba(0,0,0,.15), 0 8px 24px rgba(0,0,0,.12);
+    border-radius: 2px;
+    display: block;
+  }
+
+  .nameplate {
+    background: var(--nameplate);
+    color: var(--nameplate-ink);
+    padding: 14px 22px;
+    display: flex;
+    gap: 18px 40px;
+    border-top: 1px solid var(--panel-border);
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stat .k {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: #a7afbd;
+  }
+  .stat .v {
+    font-family: var(--font-mono);
+    font-size: 19px;
+    font-variant-numeric: tabular-nums;
+    color: var(--nameplate-ink);
+  }
+  .stat .v .unit {
+    font-size: 11px;
+    color: #9aa3b2;
+    margin-left: 3px;
+  }
+  .stat.accent .v { color: var(--nameplate-accent); }
+
+  .dist-sim {
+    padding: 20px 24px 32px;
+    background: var(--panel);
+    border-top: 1px solid var(--panel-border);
+  }
+  .dist-sim h2 {
+    font-size: 13px;
+    margin: 0 0 4px;
+    font-weight: 700;
+  }
+  .dist-sim .intro {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 14px;
+    max-width: 720px;
+  }
+  .dist-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 16px;
+  }
+  .dist-controls .field { max-width: 280px; flex: 1; min-width: 200px; }
+  .dist-controls input[type="number"] { width: 70px; }
+  .dist-stage {
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0,0,0,.15), 0 6px 18px rgba(0,0,0,.12);
+  }
+  .dist-stage svg { display: block; width: 100%; height: auto; }
+  .dist-status {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .dist-status b { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>実寸パンチングスタジオ</h1>
+    <span class="tagline">孔径・ピッチ・配列を入力すると、画面上に実物大(1:1)でパターンを表示します</span>
+  </header>
+
+  <div class="sidebar">
+    <fieldset>
+      <legend>孔形状</legend>
+      <div class="pill-row cols-3" id="shapeGroup">
+        <div class="pill">
+          <input type="radio" name="shape" value="round" id="shape-round" checked>
+          <label for="shape-round">
+            <svg viewBox="0 0 34 22"><rect class="plate" x="1" y="1" width="32" height="20" rx="2"/><circle cx="12" cy="11" r="4"/><circle cx="24" cy="11" r="4"/></svg>
+            丸孔
+          </label>
+        </div>
+        <div class="pill">
+          <input type="radio" name="shape" value="square" id="shape-square">
+          <label for="shape-square">
+            <svg viewBox="0 0 34 22"><rect class="plate" x="1" y="1" width="32" height="20" rx="2"/><rect class="hole" x="7" y="6" width="9" height="10" rx="2"/><rect class="hole" x="19" y="6" width="9" height="10" rx="2"/></svg>
+            角孔(角丸半径調整可)
+          </label>
+        </div>
+        <div class="pill">
+          <input type="radio" name="shape" value="ellipse" id="shape-ellipse">
+          <label for="shape-ellipse">
+            <svg viewBox="0 0 34 22"><rect class="plate" x="1" y="1" width="32" height="20" rx="2"/><ellipse cx="12" cy="11" rx="5" ry="3.2"/><ellipse cx="24" cy="11" rx="5" ry="3.2"/></svg>
+            楕円孔
+          </label>
+        </div>
+        <div class="pill">
+          <input type="radio" name="shape" value="triangle" id="shape-triangle">
+          <label for="shape-triangle">
+            <svg viewBox="0 0 34 22"><rect class="plate" x="1" y="1" width="32" height="20" rx="2"/><polygon points="12,6 16.6,14 7.4,14"/><polygon points="24,6 28.6,14 19.4,14"/></svg>
+            三角孔
+          </label>
+        </div>
+        <div class="pill">
+          <input type="radio" name="shape" value="hex" id="shape-hex">
+          <label for="shape-hex">
+            <svg viewBox="0 0 34 22"><rect class="plate" x="1" y="1" width="32" height="20" rx="2"/><polygon points="16.6,11 15,13.6 11.8,13.6 10.2,11 11.8,8.4 15,8.4"/><polygon points="28.6,11 27,13.6 23.8,13.6 22.2,11 23.8,8.4 27,8.4"/></svg>
+            六角孔
+          </label>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>配列方式</legend>
+      <div class="pill-row cols-3" id="arrangeGroup">
+        <div class="pill">
+          <input type="radio" name="arrange" value="straight" id="arr-straight" checked>
+          <label for="arr-straight">
+            <svg viewBox="0 0 34 22">
+              <circle cx="9" cy="6" r="2.6"/><circle cx="19" cy="6" r="2.6"/><circle cx="29" cy="6" r="2.6"/>
+              <circle cx="9" cy="16" r="2.6"/><circle cx="19" cy="16" r="2.6"/><circle cx="29" cy="16" r="2.6"/>
+            </svg>
+            直列
+          </label>
+        </div>
+        <div class="pill">
+          <input type="radio" name="arrange" value="tri60" id="arr-tri60">
+          <label for="arr-tri60">
+            <svg viewBox="0 0 34 22">
+              <circle cx="7" cy="6" r="2.6"/><circle cx="17" cy="6" r="2.6"/><circle cx="27" cy="6" r="2.6"/>
+              <circle cx="12" cy="16" r="2.6"/><circle cx="22" cy="16" r="2.6"/>
+            </svg>
+            60°千鳥
+          </label>
+        </div>
+        <div class="pill">
+          <input type="radio" name="arrange" value="stagger45" id="arr-stagger45">
+          <label for="arr-stagger45">
+            <svg viewBox="0 0 34 22">
+              <circle cx="7" cy="4" r="2.4"/><circle cx="27" cy="4" r="2.4"/>
+              <circle cx="17" cy="11" r="2.4"/>
+              <circle cx="7" cy="18" r="2.4"/><circle cx="27" cy="18" r="2.4"/>
+            </svg>
+            45°斜め
+          </label>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>孔径寸法</legend>
+
+      <div id="roundDimFields">
+        <div class="field">
+          <div class="field-label"><b id="dLabel">孔径 d</b><span class="val"><span id="dVal">6</span> mm</span></div>
+          <div class="num-row">
+            <input type="range" id="dRange" min="1" max="60" step="1" value="6">
+            <input type="number" id="dNum" min="1" max="500" step="1" value="6">
+          </div>
+        </div>
+      </div>
+
+      <div id="abDimFields" style="display:none">
+        <div class="field">
+          <div class="field-label"><b>幅 a</b><span class="val"><span id="aVal">6</span> mm</span></div>
+          <div class="num-row">
+            <input type="range" id="aRange" min="1" max="60" step="1" value="6">
+            <input type="number" id="aNum" min="1" max="500" step="1" value="6">
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label"><b>高さ b</b><span class="val"><span id="bVal">6</span> mm</span></div>
+          <div class="num-row">
+            <input type="range" id="bRange" min="1" max="60" step="1" value="6">
+            <input type="number" id="bNum" min="1" max="500" step="1" value="6">
+          </div>
+        </div>
+        <div class="field" id="cornerRadiusField">
+          <div class="field-label"><b>角丸半径 r</b><span class="val"><span id="rVal">0</span> mm</span></div>
+          <div class="num-row">
+            <input type="range" id="rRange" min="0" max="30" step="1" value="0">
+            <input type="number" id="rNum" min="0" max="250" step="1" value="0">
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label"><b>ピッチ P</b><span class="val"><span id="pVal">18</span> mm</span></div>
+        <div class="num-row">
+          <input type="range" id="pRange" min="2" max="120" step="1" value="18">
+          <input type="number" id="pNum" min="1" max="1000" step="1" value="18">
+        </div>
+      </div>
+      <div class="checkbox-row" id="pyToggleRow">
+        <input type="checkbox" id="pyToggle">
+        <label for="pyToggle">縦横で異なるピッチを使用(直列のみ)</label>
+      </div>
+      <div class="field" id="pyField" style="display:none">
+        <div class="field-label"><b>縦ピッチ Py</b><span class="val"><span id="pyVal">18</span> mm</span></div>
+        <div class="num-row">
+          <input type="range" id="pyRange" min="2" max="120" step="1" value="18">
+          <input type="number" id="pyNum" min="1" max="1000" step="1" value="18">
+        </div>
+      </div>
+      <div class="warn-box" id="overlapWarn">孔径がピッチ以上のため、穴が重なっています。ピッチを大きくするか孔径を小さくしてください。</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>縁からの距離</legend>
+      <div class="field">
+        <div class="field-label"><b>穴から板端までの距離</b><span class="val">mm</span></div>
+        <div class="num-row">
+          <input type="range" id="marginRange" min="0" max="50" step="1" value="10">
+          <input type="number" id="marginNum" min="0" max="500" step="1" value="10">
+        </div>
+      </div>
+      <div class="calib-note" style="margin:0">0は穴が板端まで達することを、10は穴全体を板端から10mm内側にオフセットして開孔することを意味します。</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>表示倍率</legend>
+      <div class="field">
+        <div class="field-label"><b>ズーム</b><span class="val"><span id="calibVal">100</span>%</span></div>
+        <div class="num-row">
+          <input type="range" id="calibRange" min="50" max="200" step="1" value="100">
+          <input type="number" id="calibNum" min="10" max="500" step="1" value="100">
+        </div>
+      </div>
+      <div class="calib-note" style="margin:0">100%は画面上で実物大(1:1)表示になります。200%に拡大したり50%に縮小して確認することもできます。</div>
+      <button class="reset-btn" id="calibReset" type="button">100%にリセット</button>
+
+      <div class="field" style="margin-top:14px">
+        <div class="field-label"><b>画面の実寸校正</b></div>
+      </div>
+      <div class="calib-note" style="margin:0">パソコンの画面によって物理的な画素密度が異なるため、100%に設定しただけでは実際の画面上のサイズと一致しない場合があります。定規を下の色付きバーに当てて、実際の <b>100mm</b> に正確に合うようスライダーを調整してください。一度校正すれば、100%表示がお使いの画面上での正確な1:1になります（この設定は端末に記憶されます）。</div>
+      <div class="calib-ruler">
+        <div class="ticks"></div>
+        <div class="bar" id="calibBar"></div>
+        <div class="label">100mm</div>
+      </div>
+      <input type="range" id="physCalRange" min="0.5" max="2.0" step="0.002" value="1">
+      <button class="reset-btn" id="physCalReset" type="button">物理校正をリセット</button>
+    </fieldset>
+
+  </div>
+
+  <div class="stage">
+    <div class="stage-toolbar">
+      <span class="name" id="patternName">R6.0 J18.0 — 45°斜め配列丸孔</span>
+      <button class="toolbar-btn" id="exportSvg" type="button">SVGを書き出す</button>
+      <button class="toolbar-btn" id="exportDxf" type="button" title="DXFはAutoCAD等のソフトで直接開き、DWGとして保存できます">DXFを書き出す（DWGとして保存可）</button>
+    </div>
+    <div class="stage-viewport" id="stageViewport">
+      <div class="ruled-frame" id="ruledFrame">
+        <svg id="plateSvg" class="plate-shadow"></svg>
+      </div>
+    </div>
+    <div class="nameplate">
+      <div class="stat accent"><div class="k">開孔率</div><div class="v" id="statRatio">--<span class="unit">%</span></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="dist-sim">
+  <h2>遠望効果シミュレーション</h2>
+  <div class="intro">距離が離れるほど板面は実際に小さく表示され、ぼかしは一切かけていません。遠距離では右側の倍率を使うことで、より広い範囲の繰り返しパターンを表示して確認できます。</div>
+  <div class="dist-controls">
+    <div class="field">
+      <div class="field-label"><b>観察距離</b><span class="val"><span id="distVal">5.0</span> m</span></div>
+      <div class="num-row">
+        <input type="range" id="distRange" min="0.5" max="150" step="0.1" value="5">
+        <input type="number" id="distNum" min="0.5" max="500" step="0.1" value="5">
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label"><b>表示範囲倍率</b><span class="val"><span id="repeatVal">1.0</span>×</span></div>
+      <div class="num-row">
+        <input type="range" id="repeatRange" min="1" max="30" step="0.5" value="1">
+        <input type="number" id="repeatNum" min="1" max="200" step="0.5" value="1">
+      </div>
+    </div>
+  </div>
+  <div class="dist-stage">
+    <svg id="distSvg" viewBox="0 0 560 360"></svg>
+  </div>
+  <div class="dist-status" id="distStatus"></div>
+  <div class="page-brand">
+    <img class="page-brand-logo" src="data:image/png;base64,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" alt="COLORFULL 昱景設計">
+  </div>
+</div>
+
+<script>
+(function(){
+  var SVGNS = "http://www.w3.org/2000/svg";
+  var STORE_KEY = "punchingStudio.settings.v3";
+  var CALIB_KEY = "punchingStudio.calibration.v2";
+  var PHYS_CAL_KEY = "punchingStudio.physCalibration.v1";
+
+  var el = {
+    dRange: document.getElementById('dRange'), dNum: document.getElementById('dNum'), dVal: document.getElementById('dVal'), dLabel: document.getElementById('dLabel'),
+    aRange: document.getElementById('aRange'), aNum: document.getElementById('aNum'), aVal: document.getElementById('aVal'),
+    bRange: document.getElementById('bRange'), bNum: document.getElementById('bNum'), bVal: document.getElementById('bVal'),
+    rRange: document.getElementById('rRange'), rNum: document.getElementById('rNum'), rVal: document.getElementById('rVal'),
+    roundDimFields: document.getElementById('roundDimFields'), abDimFields: document.getElementById('abDimFields'),
+    cornerRadiusField: document.getElementById('cornerRadiusField'),
+    pRange: document.getElementById('pRange'), pNum: document.getElementById('pNum'), pVal: document.getElementById('pVal'),
+    pyToggle: document.getElementById('pyToggle'), pyField: document.getElementById('pyField'), pyToggleRow: document.getElementById('pyToggleRow'),
+    pyRange: document.getElementById('pyRange'), pyNum: document.getElementById('pyNum'), pyVal: document.getElementById('pyVal'),
+    marginRange: document.getElementById('marginRange'), marginNum: document.getElementById('marginNum'),
+    calibRange: document.getElementById('calibRange'), calibNum: document.getElementById('calibNum'), calibVal: document.getElementById('calibVal'), calibReset: document.getElementById('calibReset'),
+    calibBar: document.getElementById('calibBar'), physCalRange: document.getElementById('physCalRange'), physCalReset: document.getElementById('physCalReset'),
+    overlapWarn: document.getElementById('overlapWarn'),
+    stageViewport: document.getElementById('stageViewport'), ruledFrame: document.getElementById('ruledFrame'),
+    plateSvg: document.getElementById('plateSvg'),
+    patternName: document.getElementById('patternName'),
+    statRatio: document.getElementById('statRatio'),
+    exportSvg: document.getElementById('exportSvg'), exportDxf: document.getElementById('exportDxf'),
+    distRange: document.getElementById('distRange'), distNum: document.getElementById('distNum'), distVal: document.getElementById('distVal'),
+    distSvg: document.getElementById('distSvg'), distStatus: document.getElementById('distStatus'),
+    repeatRange: document.getElementById('repeatRange'), repeatNum: document.getElementById('repeatNum'), repeatVal: document.getElementById('repeatVal')
+  };
+
+  var BASE_PX_PER_MM = 96 / 25.4;
+  var DIM_MARGIN = 46;
+  var HOLE_EXPORT_CAP = 20000;
+
+  function getShape(){ return document.querySelector('input[name="shape"]:checked').value; }
+  function getArrange(){ return document.querySelector('input[name="arrange"]:checked').value; }
+
+  // round/triangle/hex all size themselves by a single circumscribed-circle diameter `d`,
+  // as opposed to square/ellipse which use a width/height pair.
+  function isDiaShape(shape){ return shape === 'round' || shape === 'triangle' || shape === 'hex'; }
+  var POLY_SIDES = { triangle: 3, hex: 6 };
+  var POLY_START_DEG = { triangle: -90, hex: 0 };
+  function regularPolygonPoints(cx, cy, R, shape){
+    var n = POLY_SIDES[shape], start = POLY_START_DEG[shape];
+    var pts = [];
+    for (var i = 0; i < n; i++) {
+      var ang = (start + i * 360 / n) * Math.PI / 180;
+      pts.push([cx + R * Math.cos(ang), cy + R * Math.sin(ang)]);
+    }
+    return pts;
+  }
+
+  function getPlateMM(){
+    // No user-set plate size — the pattern simply fills whatever viewport space is available,
+    // so it always sits cleanly on screen without needing a real-world W/H to be chosen.
+    var margin = Math.max(0, parseFloat(el.marginNum.value) || 0);
+    var scale = mmToPx();
+    var PAD = 28;
+    var vw = el.stageViewport.clientWidth || 640;
+    var vh = el.stageViewport.clientHeight || 420;
+    var W = Math.max(30, (vw - PAD * 2 - DIM_MARGIN) / scale);
+    var H = Math.max(30, (vh - PAD * 2 - DIM_MARGIN) / scale);
+    return { W: W, H: H, margin: margin };
+  }
+
+  function syncPair(range, num, cb){
+    range.addEventListener('input', function(){ num.value = range.value; cb(); });
+    num.addEventListener('input', function(){
+      var v = parseFloat(num.value);
+      if (!isNaN(v)) { range.value = Math.min(Math.max(v, parseFloat(range.min)), parseFloat(range.max)); }
+      cb();
+    });
+  }
+
+  function loadSettings(){
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return;
+      var s = JSON.parse(raw);
+      if (s.shape) document.getElementById('shape-' + s.shape).checked = true;
+      if (s.arrange) document.getElementById('arr-' + (s.arrange === 'tri60' ? 'tri60' : s.arrange === 'stagger45' ? 'stagger45' : 'straight')).checked = true;
+      if (s.d != null) { el.dRange.value = s.d; el.dNum.value = s.d; }
+      if (s.a != null) { el.aRange.value = s.a; el.aNum.value = s.a; }
+      if (s.b != null) { el.bRange.value = s.b; el.bNum.value = s.b; }
+      if (s.r != null) { el.rRange.value = s.r; el.rNum.value = s.r; }
+      if (s.p != null) { el.pRange.value = s.p; el.pNum.value = s.p; }
+      if (s.py != null) { el.pyRange.value = s.py; el.pyNum.value = s.py; }
+      if (s.pyOn != null) el.pyToggle.checked = s.pyOn;
+      if (s.margin != null) { el.marginRange.value = s.margin; el.marginNum.value = s.margin; }
+    } catch(e){}
+    try {
+      var c = localStorage.getItem(CALIB_KEY);
+      if (c) { el.calibRange.value = c; el.calibNum.value = c; }
+    } catch(e){}
+    try {
+      var pc = localStorage.getItem(PHYS_CAL_KEY);
+      if (pc) el.physCalRange.value = pc;
+    } catch(e){}
+  }
+
+  function saveSettings(){
+    var s = {
+      shape: getShape(), arrange: getArrange(),
+      d: parseFloat(el.dNum.value), a: parseFloat(el.aNum.value), b: parseFloat(el.bNum.value), r: parseFloat(el.rNum.value),
+      p: parseFloat(el.pNum.value),
+      py: parseFloat(el.pyNum.value), pyOn: el.pyToggle.checked,
+      margin: parseFloat(el.marginNum.value)
+    };
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch(e){}
+  }
+
+  function saveCalib(){
+    try { localStorage.setItem(CALIB_KEY, el.calibRange.value); } catch(e){}
+  }
+
+  function savePhysCal(){
+    try { localStorage.setItem(PHYS_CAL_KEY, el.physCalRange.value); } catch(e){}
+  }
+
+  function updateCalibBar(){
+    var physCal = parseFloat(el.physCalRange.value) || 1;
+    var pxPer100mm = BASE_PX_PER_MM * physCal * 100;
+    el.calibBar.style.width = pxPer100mm + 'px';
+  }
+
+  function mmToPx(){
+    var displayPct = parseFloat(el.calibRange.value) / 100;
+    var physCal = parseFloat(el.physCalRange.value) || 1;
+    return BASE_PX_PER_MM * displayPct * physCal;
+  }
+
+  function geometry(){
+    var shape = getShape();
+    var arrange = getArrange();
+    var Px = parseFloat(el.pNum.value) || 1;
+    var Py = el.pyToggle.checked && arrange === 'straight' ? (parseFloat(el.pyNum.value) || Px) : Px;
+
+    var holeArea, overlapDim, a, b, r, d;
+    if (shape === 'round') {
+      d = parseFloat(el.dNum.value) || 0;
+      holeArea = (Math.PI / 4) * d * d;
+      overlapDim = d;
+    } else if (shape === 'triangle' || shape === 'hex') {
+      d = parseFloat(el.dNum.value) || 0;
+      var nSides = POLY_SIDES[shape], polyR = d / 2;
+      holeArea = 0.5 * nSides * polyR * polyR * Math.sin(2 * Math.PI / nSides);
+      overlapDim = d;
+    } else if (shape === 'ellipse') {
+      a = parseFloat(el.aNum.value) || 0;
+      b = parseFloat(el.bNum.value) || 0;
+      r = 0;
+      holeArea = (Math.PI / 4) * a * b;
+      overlapDim = Math.max(a, b);
+    } else {
+      a = parseFloat(el.aNum.value) || 0;
+      b = parseFloat(el.bNum.value) || 0;
+      r = parseFloat(el.rNum.value) || 0;
+      r = Math.max(0, Math.min(r, Math.min(a, b) / 2));
+      holeArea = a * b - (4 - Math.PI) * r * r;
+      overlapDim = Math.max(a, b);
+    }
+
+    var cellW, cellH, holesPerCell;
+    if (arrange === 'straight') {
+      cellW = Px; cellH = Py; holesPerCell = 1;
+    } else if (arrange === 'tri60') {
+      cellW = Px; cellH = Px * Math.sqrt(3) / 2; holesPerCell = 1;
+    } else {
+      cellW = Px; cellH = Px; holesPerCell = 2;
+    }
+
+    var ratio = (holesPerCell * holeArea) / (cellW * cellH);
+
+    return {
+      shape: shape, arrange: arrange, d: d, a: a, b: b, r: r, overlapDim: overlapDim,
+      Px: Px, Py: Py, cellW: cellW, cellH: cellH, holesPerCell: holesPerCell,
+      holeArea: holeArea, ratio: Math.min(Math.max(ratio, 0), 1)
+    };
+  }
+
+  // Phase origin: the first hole's near edge sits EXACTLY `margin` mm from the plate edge
+  // (not just "at least margin"), so margin=0 means the hole touches the edge with no gap,
+  // and margin=10 means a precise 10mm clearance — never a pitch-dependent remainder gap.
+  function patternPhase(g, margin){
+    margin = margin || 0;
+    var halfW = isDiaShape(g.shape) ? g.d / 2 : g.a / 2;
+    var halfH = isDiaShape(g.shape) ? g.d / 2 : g.b / 2;
+    return { px0: margin + halfW, py0: margin + halfH, halfW: halfW, halfH: halfH };
+  }
+
+  function firstHoleRefs(g, margin){
+    var ph = patternPhase(g, margin);
+    var cellW = g.cellW, cellH = g.cellH;
+    var px0 = ph.px0, py0 = ph.py0;
+    if (g.arrange === 'straight') {
+      return { h1: [px0, py0], h2: [px0 + cellW, py0], h3: [px0, py0 + cellH], hDimVal: g.Px, vDimVal: g.Py };
+    } else if (g.arrange === 'tri60') {
+      return { h1: [px0, py0], h2: [px0 + cellW, py0], h3: [px0 - cellW / 2, py0 + cellH], hDimVal: g.Px, vDimVal: g.cellH };
+    }
+    return { h1: [px0, py0], h2: [px0 + cellW, py0], h3: [px0 + cellW / 2, py0 + cellH / 2], hDimVal: g.Px, vDimVal: g.cellH / 2 };
+  }
+
+  function holeSizeLabel(g){
+    if (g.shape === 'round') return '⌀' + g.d.toFixed(0);
+    if (g.shape === 'triangle') return '△⌀' + g.d.toFixed(0);
+    if (g.shape === 'hex') return '⬡⌀' + g.d.toFixed(0);
+    if (g.shape === 'ellipse') return g.a.toFixed(0) + '×' + g.b.toFixed(0);
+    return g.a.toFixed(0) + '×' + g.b.toFixed(0) + ' R' + g.r.toFixed(0);
+  }
+
+  function enumerateHoles(g, W, H, margin){
+    var ph = patternPhase(g, margin);
+    var px0 = ph.px0, py0 = ph.py0, halfW = ph.halfW, halfH = ph.halfH;
+    var pts = [];
+    var cellW = g.cellW, cellH = g.cellH;
+    var EPS = 1e-6;
+    function tryAdd(x, y){
+      if (x - halfW >= -EPS && x + halfW <= W + EPS && y - halfH >= -EPS && y + halfH <= H + EPS) pts.push([x, y]);
+    }
+    if (g.arrange === 'straight') {
+      var ni = Math.ceil((W - px0) / cellW) + 2, nj = Math.ceil((H - py0) / cellH) + 2;
+      for (var i = 0; i <= ni; i++) for (var j = 0; j <= nj; j++) tryAdd(px0 + i * cellW, py0 + j * cellH);
+    } else if (g.arrange === 'tri60') {
+      var tileH = cellH * 2;
+      var nk = Math.ceil((H - py0) / tileH) + 2, ni2 = Math.ceil((W - px0) / cellW) + 3;
+      for (var k = 0; k <= nk; k++) {
+        var yA = py0 + k * tileH, yB = yA + cellH;
+        for (var m = -2; m <= ni2; m++) { tryAdd(px0 + m * cellW, yA); tryAdd(px0 - cellW / 2 + m * cellW, yB); }
+      }
+    } else {
+      var ni3 = Math.ceil((W - px0) / cellW) + 2, nj3 = Math.ceil((H - py0) / cellH) + 2;
+      for (var i3 = -1; i3 <= ni3; i3++) for (var j3 = -1; j3 <= nj3; j3++) { tryAdd(px0 + i3 * cellW, py0 + j3 * cellH); tryAdd(px0 + cellW / 2 + i3 * cellW, py0 + cellH / 2 + j3 * cellH); }
+    }
+    return pts;
+  }
+
+  function buildPatternName(g){
+    var arrLabel = g.arrange === 'straight' ? '直列配列' : g.arrange === 'tri60' ? '60°千鳥配列' : '45°斜め配列';
+    var pStr = g.arrange === 'straight' && el.pyToggle.checked ? (g.Px.toFixed(0) + 'x' + g.Py.toFixed(0)) : g.Px.toFixed(0);
+    if (g.shape === 'round') {
+      return 'R' + g.d.toFixed(0) + ' J' + pStr + ' — ' + arrLabel + '丸孔';
+    }
+    if (g.shape === 'triangle') {
+      return 'T' + g.d.toFixed(0) + ' J' + pStr + ' — ' + arrLabel + '三角孔';
+    }
+    if (g.shape === 'hex') {
+      return 'H' + g.d.toFixed(0) + ' J' + pStr + ' — ' + arrLabel + '六角孔';
+    }
+    if (g.shape === 'ellipse') {
+      return g.a.toFixed(0) + '×' + g.b.toFixed(0) + ' J' + pStr + ' — ' + arrLabel + '楕円孔';
+    }
+    return g.a.toFixed(0) + '×' + g.b.toFixed(0) + ' R' + g.r.toFixed(0) + ' J' + pStr + ' — ' + arrLabel + '角孔';
+  }
+
+  function renderDistanceSim(g){
+    var D = Math.max(0.1, parseFloat(el.distNum.value) || 5);
+    el.distVal.textContent = D.toFixed(1);
+    var repeat = Math.max(1, parseFloat(el.repeatNum.value) || 1);
+    el.repeatVal.textContent = repeat.toFixed(1);
+
+    var CANVAS_W = 1000, CANVAS_H = 300;
+    var plateMM = getPlateMM();
+    var W = plateMM.W, H = plateMM.H;
+
+    // True perspective: the panel's on-screen size shrinks as 1/D, same as it would to a real
+    // eye. D_REF/refPxPerMM just fixes how big it reads at 1m; nothing else depends on them.
+    var D_REF = 1;
+    var refPxPerMM = 44 / g.cellW;
+    var displayScale = refPxPerMM * (D_REF / D);
+    var cellWpx = g.cellW * displayScale, cellHpx = g.cellH * displayScale;
+
+    // "表示範囲倍率" only widens how much of the same true-scale repeating pattern is shown
+    // (like viewing a longer stretch of the same facade) — it does not change displayScale,
+    // cellWpx or blurPx, so it never affects how blended the holes look at a given distance.
+    var panelWpx = W * displayScale * repeat, panelHpx = H * displayScale * repeat;
+
+    function holeShapePx(cx, cy){
+      var s;
+      if (g.shape === 'round') {
+        s = document.createElementNS(SVGNS, 'circle');
+        s.setAttribute('cx', cx); s.setAttribute('cy', cy); s.setAttribute('r', (g.d / 2) * displayScale);
+      } else if (g.shape === 'triangle' || g.shape === 'hex') {
+        s = document.createElementNS(SVGNS, 'polygon');
+        var polyPts = regularPolygonPoints(cx, cy, (g.d / 2) * displayScale, g.shape);
+        s.setAttribute('points', polyPts.map(function(pp){ return pp[0] + ',' + pp[1]; }).join(' '));
+      } else if (g.shape === 'ellipse') {
+        s = document.createElementNS(SVGNS, 'ellipse');
+        s.setAttribute('cx', cx); s.setAttribute('cy', cy);
+        s.setAttribute('rx', (g.a / 2) * displayScale); s.setAttribute('ry', (g.b / 2) * displayScale);
+      } else {
+        var apx = g.a * displayScale, bpx = g.b * displayScale, rpx = g.r * displayScale;
+        s = document.createElementNS(SVGNS, 'rect');
+        s.setAttribute('x', cx - apx / 2); s.setAttribute('y', cy - bpx / 2);
+        s.setAttribute('width', apx); s.setAttribute('height', bpx);
+        s.setAttribute('rx', rpx); s.setAttribute('ry', rpx);
+      }
+      s.setAttribute('fill', '#000');
+      return s;
+    }
+
+    var maskPattern = document.createElementNS(SVGNS, 'pattern');
+    maskPattern.setAttribute('id', 'distHolePattern');
+    maskPattern.setAttribute('patternUnits', 'userSpaceOnUse');
+    var bgRectForMask = document.createElementNS(SVGNS, 'rect');
+    bgRectForMask.setAttribute('x', 0); bgRectForMask.setAttribute('y', 0); bgRectForMask.setAttribute('fill', '#fff');
+    if (g.arrange === 'straight') {
+      var cellHpxStraight = g.cellH * displayScale;
+      maskPattern.setAttribute('width', cellWpx); maskPattern.setAttribute('height', cellHpxStraight);
+      bgRectForMask.setAttribute('width', cellWpx); bgRectForMask.setAttribute('height', cellHpxStraight);
+      maskPattern.appendChild(bgRectForMask);
+      maskPattern.appendChild(holeShapePx(cellWpx / 2, cellHpxStraight / 2));
+    } else if (g.arrange === 'tri60') {
+      var tileHpx = cellHpx * 2;
+      maskPattern.setAttribute('width', cellWpx); maskPattern.setAttribute('height', tileHpx);
+      bgRectForMask.setAttribute('width', cellWpx); bgRectForMask.setAttribute('height', tileHpx);
+      maskPattern.appendChild(bgRectForMask);
+      maskPattern.appendChild(holeShapePx(cellWpx / 2, tileHpx / 4));
+      maskPattern.appendChild(holeShapePx(0, tileHpx * 3 / 4));
+      maskPattern.appendChild(holeShapePx(cellWpx, tileHpx * 3 / 4));
+    } else {
+      maskPattern.setAttribute('width', cellWpx); maskPattern.setAttribute('height', cellHpx);
+      bgRectForMask.setAttribute('width', cellWpx); bgRectForMask.setAttribute('height', cellHpx);
+      maskPattern.appendChild(bgRectForMask);
+      maskPattern.appendChild(holeShapePx(0, 0));
+      maskPattern.appendChild(holeShapePx(cellWpx, 0));
+      maskPattern.appendChild(holeShapePx(0, cellHpx));
+      maskPattern.appendChild(holeShapePx(cellWpx, cellHpx));
+      maskPattern.appendChild(holeShapePx(cellWpx / 2, cellHpx / 2));
+    }
+
+    var maskEl = document.createElementNS(SVGNS, 'mask');
+    maskEl.setAttribute('id', 'distHoleMask');
+    maskEl.setAttribute('maskUnits', 'userSpaceOnUse');
+    maskEl.setAttribute('x', -panelWpx); maskEl.setAttribute('y', -panelHpx);
+    maskEl.setAttribute('width', panelWpx * 3); maskEl.setAttribute('height', panelHpx * 3);
+    var maskFillRect = document.createElementNS(SVGNS, 'rect');
+    maskFillRect.setAttribute('x', -panelWpx); maskFillRect.setAttribute('y', -panelHpx);
+    maskFillRect.setAttribute('width', panelWpx * 3); maskFillRect.setAttribute('height', panelHpx * 3);
+    maskFillRect.setAttribute('fill', 'url(#distHolePattern)');
+    maskEl.appendChild(maskFillRect);
+
+    var grad = document.createElementNS(SVGNS, 'linearGradient');
+    grad.setAttribute('id', 'distBgGrad');
+    grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0'); grad.setAttribute('x2', '0'); grad.setAttribute('y2', '1');
+    [[0, '#8fb8dd'], [45, '#cfe4ee'], [62, '#b7c0c6'], [100, '#888d92']].forEach(function(s){
+      var stop = document.createElementNS(SVGNS, 'stop');
+      stop.setAttribute('offset', s[0] + '%'); stop.setAttribute('stop-color', s[1]);
+      grad.appendChild(stop);
+    });
+
+    var svg = el.distSvg;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.setAttribute('viewBox', '0 0 ' + CANVAS_W + ' ' + CANVAS_H);
+
+    var defs = document.createElementNS(SVGNS, 'defs');
+    defs.appendChild(grad); defs.appendChild(maskPattern); defs.appendChild(maskEl);
+    svg.appendChild(defs);
+
+    var bg = document.createElementNS(SVGNS, 'rect');
+    bg.setAttribute('x', 0); bg.setAttribute('y', 0);
+    bg.setAttribute('width', CANVAS_W); bg.setAttribute('height', CANVAS_H);
+    bg.setAttribute('fill', 'url(#distBgGrad)');
+    svg.appendChild(bg);
+
+    var panelG = document.createElementNS(SVGNS, 'g');
+    panelG.setAttribute('transform', 'translate(' + ((CANVAS_W - panelWpx) / 2) + ',' + ((CANVAS_H - panelHpx) / 2) + ')');
+
+    var metalRect = document.createElementNS(SVGNS, 'rect');
+    metalRect.setAttribute('x', 0); metalRect.setAttribute('y', 0);
+    metalRect.setAttribute('width', panelWpx); metalRect.setAttribute('height', panelHpx);
+    metalRect.setAttribute('fill', 'var(--metal-b)');
+    metalRect.setAttribute('mask', 'url(#distHoleMask)');
+    panelG.appendChild(metalRect);
+    svg.appendChild(panelG);
+
+    el.distStatus.innerHTML = 'この距離での孔間隔は約 <b>' + cellWpx.toFixed(1) + '</b> px（画面換算）';
+  }
+
+  function render(){
+    var shape = getShape();
+    el.roundDimFields.style.display = isDiaShape(shape) ? 'block' : 'none';
+    el.abDimFields.style.display = (shape === 'square' || shape === 'ellipse') ? 'block' : 'none';
+    el.cornerRadiusField.style.display = shape === 'square' ? 'flex' : 'none';
+    el.dLabel.textContent = shape === 'round' ? '孔径 d' : '外接円直径 d';
+
+    if (shape === 'square') {
+      var aVal = parseFloat(el.aNum.value) || 0;
+      var bVal = parseFloat(el.bNum.value) || 0;
+      var maxR = Math.max(0, Math.floor(Math.min(aVal, bVal) / 2));
+      el.rRange.max = maxR;
+      if (parseFloat(el.rNum.value) > maxR) { el.rNum.value = maxR; el.rRange.value = maxR; }
+    }
+
+    var g = geometry();
+    var scale = mmToPx();
+    var plateMM = getPlateMM();
+    var W = plateMM.W, H = plateMM.H, margin = plateMM.margin;
+
+    el.dVal.textContent = (g.d || 0).toFixed(0);
+    el.aVal.textContent = (g.a || 0).toFixed(0);
+    el.bVal.textContent = (g.b || 0).toFixed(0);
+    el.rVal.textContent = (g.r || 0).toFixed(0);
+    el.pVal.textContent = g.Px.toFixed(0);
+    el.pyVal.textContent = g.Py.toFixed(0);
+    el.calibVal.textContent = (parseFloat(el.calibRange.value) || 100).toFixed(0);
+
+    var overlap = g.arrange === 'straight'
+      ? (isDiaShape(shape) ? g.d >= Math.min(g.Px, g.Py) : (g.a >= g.Px || g.b >= g.Py))
+      : (g.overlapDim >= g.Px);
+    el.overlapWarn.classList.toggle('show', overlap);
+
+    el.pyToggleRow.style.display = g.arrange === 'straight' ? 'flex' : 'none';
+    el.pyField.style.display = (g.arrange === 'straight' && el.pyToggle.checked) ? 'flex' : 'none';
+
+    el.patternName.textContent = buildPatternName(g);
+
+    var ratioPct = g.ratio * 100;
+    el.statRatio.innerHTML = ratioPct.toFixed(1) + '<span class="unit">%</span>';
+
+    // --- SVG plate ---
+    var pxW = W * scale, pxH = H * scale;
+    var svg = el.plateSvg;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.setAttribute('width', pxW + DIM_MARGIN);
+    svg.setAttribute('height', pxH + DIM_MARGIN);
+    svg.setAttribute('viewBox', '0 0 ' + (pxW + DIM_MARGIN) + ' ' + (pxH + DIM_MARGIN));
+
+    var plateGroup = document.createElementNS(SVGNS, 'g');
+    plateGroup.setAttribute('transform', 'translate(' + DIM_MARGIN + ',' + DIM_MARGIN + ')');
+    svg.appendChild(plateGroup);
+
+    var defs = document.createElementNS(SVGNS, 'defs');
+
+    var metalGrad = document.createElementNS(SVGNS, 'linearGradient');
+    metalGrad.setAttribute('id', 'metalGrad');
+    metalGrad.setAttribute('gradientUnits', 'userSpaceOnUse');
+    metalGrad.setAttribute('x1', '0'); metalGrad.setAttribute('y1', '0');
+    metalGrad.setAttribute('x2', '0'); metalGrad.setAttribute('y2', pxH);
+    var s1 = document.createElementNS(SVGNS, 'stop'); s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', 'var(--metal-a)');
+    var s2 = document.createElementNS(SVGNS, 'stop'); s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', 'var(--metal-b)');
+    metalGrad.appendChild(s1); metalGrad.appendChild(s2);
+    defs.appendChild(metalGrad);
+
+    var cellWpx = g.cellW * scale, cellHpx = g.cellH * scale;
+    var pattern = document.createElementNS(SVGNS, 'pattern');
+    pattern.setAttribute('id', 'holePattern');
+    pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+
+    var rpx = isDiaShape(shape) ? (g.d / 2) * scale : 0;
+    var apx = (shape === 'square' || shape === 'ellipse') ? g.a * scale : 0;
+    var bpx = (shape === 'square' || shape === 'ellipse') ? g.b * scale : 0;
+    var fpx = shape === 'square' ? g.r * scale : 0;
+
+    function makeHole(cx, cy){
+      var shapeEl;
+      if (shape === 'round') {
+        shapeEl = document.createElementNS(SVGNS, 'circle');
+        shapeEl.setAttribute('cx', cx); shapeEl.setAttribute('cy', cy); shapeEl.setAttribute('r', rpx);
+      } else if (shape === 'triangle' || shape === 'hex') {
+        shapeEl = document.createElementNS(SVGNS, 'polygon');
+        var polyPts = regularPolygonPoints(cx, cy, rpx, shape);
+        shapeEl.setAttribute('points', polyPts.map(function(pp){ return pp[0] + ',' + pp[1]; }).join(' '));
+      } else if (shape === 'ellipse') {
+        shapeEl = document.createElementNS(SVGNS, 'ellipse');
+        shapeEl.setAttribute('cx', cx); shapeEl.setAttribute('cy', cy);
+        shapeEl.setAttribute('rx', apx / 2); shapeEl.setAttribute('ry', bpx / 2);
+      } else {
+        shapeEl = document.createElementNS(SVGNS, 'rect');
+        shapeEl.setAttribute('x', cx - apx / 2); shapeEl.setAttribute('y', cy - bpx / 2);
+        shapeEl.setAttribute('width', apx); shapeEl.setAttribute('height', bpx);
+        shapeEl.setAttribute('rx', fpx); shapeEl.setAttribute('ry', fpx);
+      }
+      shapeEl.setAttribute('fill', 'var(--void)');
+      shapeEl.setAttribute('stroke', 'var(--metal-edge)');
+      shapeEl.setAttribute('stroke-width', '1');
+      return shapeEl;
+    }
+
+    // Phase the tile grid so the first hole's near edge sits exactly `margin` mm from the
+    // plate edge (see patternPhase) — shifting the <pattern> origin via x/y keeps the tile's
+    // own internal layout untouched while aligning the whole repeating grid to that offset.
+    var ph = patternPhase(g, margin);
+    var px0px = ph.px0 * scale, py0px = ph.py0 * scale;
+
+    if (g.arrange === 'straight') {
+      pattern.setAttribute('width', cellWpx);
+      pattern.setAttribute('height', cellHpx);
+      pattern.setAttribute('x', px0px - cellWpx / 2);
+      pattern.setAttribute('y', py0px - cellHpx / 2);
+      pattern.appendChild(makeHole(cellWpx / 2, cellHpx / 2));
+    } else if (g.arrange === 'tri60') {
+      var tileH = cellHpx * 2;
+      pattern.setAttribute('width', cellWpx);
+      pattern.setAttribute('height', tileH);
+      pattern.setAttribute('x', px0px - cellWpx / 2);
+      pattern.setAttribute('y', py0px - tileH / 4);
+      pattern.appendChild(makeHole(cellWpx / 2, tileH / 4));
+      pattern.appendChild(makeHole(0, tileH * 3 / 4));
+      pattern.appendChild(makeHole(cellWpx, tileH * 3 / 4));
+    } else {
+      pattern.setAttribute('width', cellWpx);
+      pattern.setAttribute('height', cellHpx);
+      pattern.setAttribute('x', px0px);
+      pattern.setAttribute('y', py0px);
+      pattern.appendChild(makeHole(0, 0));
+      pattern.appendChild(makeHole(cellWpx, 0));
+      pattern.appendChild(makeHole(0, cellHpx));
+      pattern.appendChild(makeHole(cellWpx, cellHpx));
+      pattern.appendChild(makeHole(cellWpx / 2, cellHpx / 2));
+    }
+    defs.appendChild(pattern);
+    plateGroup.appendChild(defs);
+
+    var base = document.createElementNS(SVGNS, 'rect');
+    base.setAttribute('x', 0); base.setAttribute('y', 0);
+    base.setAttribute('width', pxW); base.setAttribute('height', pxH);
+    base.setAttribute('fill', 'url(#metalGrad)');
+    plateGroup.appendChild(base);
+
+    var holesLayer = document.createElementNS(SVGNS, 'rect');
+    holesLayer.setAttribute('x', 0); holesLayer.setAttribute('y', 0);
+    holesLayer.setAttribute('width', pxW); holesLayer.setAttribute('height', pxH);
+    holesLayer.setAttribute('fill', 'url(#holePattern)');
+    plateGroup.appendChild(holesLayer);
+
+    // Edge margin safety net: the phased tile grid already keeps holes clear of the margin
+    // band under normal parameters, but an extreme case (margin + hole size exceeding the
+    // pitch) can let a wrapped-around tile poke back in — paint over exactly the margin
+    // band, so margin=0 draws nothing at all and leaves zero gap.
+    var marginPx = margin * scale;
+    if (margin > 0.001) {
+      function marginBand(x, y, w, h){
+        var r = document.createElementNS(SVGNS, 'rect');
+        r.setAttribute('x', x); r.setAttribute('y', y);
+        r.setAttribute('width', Math.max(0, w)); r.setAttribute('height', Math.max(0, h));
+        r.setAttribute('fill', 'url(#metalGrad)');
+        return r;
+      }
+      plateGroup.appendChild(marginBand(0, 0, pxW, marginPx));
+      plateGroup.appendChild(marginBand(0, pxH - marginPx, pxW, marginPx));
+      plateGroup.appendChild(marginBand(0, marginPx, marginPx, pxH - 2 * marginPx));
+      plateGroup.appendChild(marginBand(pxW - marginPx, marginPx, marginPx, pxH - 2 * marginPx));
+    }
+
+    var border = document.createElementNS(SVGNS, 'rect');
+    border.setAttribute('x', 0.5); border.setAttribute('y', 0.5);
+    border.setAttribute('width', pxW - 1); border.setAttribute('height', pxH - 1);
+    border.setAttribute('fill', 'none');
+    border.setAttribute('stroke', 'var(--metal-edge)');
+    border.setAttribute('stroke-width', '1');
+    plateGroup.appendChild(border);
+
+    // --- dimension line annotations (top-left corner) ---
+    function makeArrow(tipX, tipY, dx, dy){
+      var size = 5, w = 2;
+      var backX = tipX - dx * size, backY = tipY - dy * size;
+      var perpX = -dy, perpY = dx;
+      var p1x = backX + perpX * w, p1y = backY + perpY * w;
+      var p2x = backX - perpX * w, p2y = backY - perpY * w;
+      var poly = document.createElementNS(SVGNS, 'polygon');
+      poly.setAttribute('points', tipX + ',' + tipY + ' ' + p1x + ',' + p1y + ' ' + p2x + ',' + p2y);
+      poly.setAttribute('fill', 'var(--muted)');
+      return poly;
+    }
+    function extLine(x1, y1, x2, y2){
+      var l = document.createElementNS(SVGNS, 'line');
+      l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+      l.setAttribute('stroke', 'var(--muted)'); l.setAttribute('stroke-width', '0.75');
+      return l;
+    }
+    function dimText(x, y, label, rotate, anchor){
+      var txt = document.createElementNS(SVGNS, 'text');
+      txt.setAttribute('x', x); txt.setAttribute('y', y);
+      txt.setAttribute('text-anchor', anchor || 'middle');
+      txt.setAttribute('font-size', '11'); txt.setAttribute('font-family', 'ui-monospace,Menlo,Consolas,monospace');
+      txt.setAttribute('fill', 'var(--ink)');
+      if (rotate) txt.setAttribute('transform', 'rotate(-90 ' + x + ' ' + y + ')');
+      txt.textContent = label;
+      return txt;
+    }
+
+    var refs = firstHoleRefs(g, margin);
+    var p1x = refs.h1[0] * scale, p1y = refs.h1[1] * scale;
+    var p2x = refs.h2[0] * scale, p2y = refs.h2[1] * scale;
+    var p3x = refs.h3[0] * scale, p3y = refs.h3[1] * scale;
+    var dimGroup = document.createElementNS(SVGNS, 'g');
+
+    // horizontal pitch dimension
+    var hy = -20;
+    var hLo = Math.min(p1x, p2x), hHi = Math.max(p1x, p2x);
+    dimGroup.appendChild(extLine(p1x, p1y, p1x, hy - 6));
+    dimGroup.appendChild(extLine(p2x, p2y, p2x, hy - 6));
+    var hLine = document.createElementNS(SVGNS, 'line');
+    hLine.setAttribute('x1', hLo); hLine.setAttribute('y1', hy); hLine.setAttribute('x2', hHi); hLine.setAttribute('y2', hy);
+    hLine.setAttribute('stroke', 'var(--muted)'); hLine.setAttribute('stroke-width', '0.75');
+    dimGroup.appendChild(hLine);
+    dimGroup.appendChild(makeArrow(hLo, hy, -1, 0));
+    dimGroup.appendChild(makeArrow(hHi, hy, 1, 0));
+    dimGroup.appendChild(dimText((hLo + hHi) / 2, hy - 5, refs.hDimVal.toFixed(0), false));
+
+    // vertical pitch dimension
+    var vx = -20;
+    var vLo = Math.min(p1y, p3y), vHi = Math.max(p1y, p3y);
+    dimGroup.appendChild(extLine(p1x, p1y, vx - 6, p1y));
+    dimGroup.appendChild(extLine(p3x, p3y, vx - 6, p3y));
+    var vLine = document.createElementNS(SVGNS, 'line');
+    vLine.setAttribute('x1', vx); vLine.setAttribute('y1', vLo); vLine.setAttribute('x2', vx); vLine.setAttribute('y2', vHi);
+    vLine.setAttribute('stroke', 'var(--muted)'); vLine.setAttribute('stroke-width', '0.75');
+    dimGroup.appendChild(vLine);
+    dimGroup.appendChild(makeArrow(vx, vLo, 0, -1));
+    dimGroup.appendChild(makeArrow(vx, vHi, 0, 1));
+    dimGroup.appendChild(dimText(vx - 8, (vLo + vHi) / 2, refs.vDimVal.toFixed(0), true));
+
+    // gap dimension — clear metal width between two adjacent holes in the same row
+    var gapMM = g.Px - (isDiaShape(shape) ? g.d : g.a);
+    if (gapMM > 0.001) {
+      var gapHalf = isDiaShape(shape) ? rpx : apx / 2;
+      var gapX1 = p1x + gapHalf, gapX2 = p2x - gapHalf, gapY = p1y;
+      var gapLine = document.createElementNS(SVGNS, 'line');
+      gapLine.setAttribute('x1', gapX1); gapLine.setAttribute('y1', gapY); gapLine.setAttribute('x2', gapX2); gapLine.setAttribute('y2', gapY);
+      gapLine.setAttribute('stroke', 'var(--muted)'); gapLine.setAttribute('stroke-width', '0.75');
+      dimGroup.appendChild(gapLine);
+      dimGroup.appendChild(makeArrow(gapX1, gapY, -1, 0));
+      dimGroup.appendChild(makeArrow(gapX2, gapY, 1, 0));
+      dimGroup.appendChild(dimText((gapX1 + gapX2) / 2, gapY - 5, gapMM.toFixed(0), false));
+    }
+
+    // margin dimension — distance from the plate edge to the first hole's edge
+    if (margin > 0.001) {
+      var mHalfW = isDiaShape(shape) ? rpx : apx / 2;
+      var mHalfH = isDiaShape(shape) ? rpx : bpx / 2;
+      var marginValPx = margin * scale;
+
+      var mgX1 = 0, mgX2 = p1x - mHalfW, mgY = p1y;
+      if (mgX2 > mgX1 + 1) {
+        var mgLineH = document.createElementNS(SVGNS, 'line');
+        mgLineH.setAttribute('x1', mgX1); mgLineH.setAttribute('y1', mgY); mgLineH.setAttribute('x2', mgX2); mgLineH.setAttribute('y2', mgY);
+        mgLineH.setAttribute('stroke', 'var(--muted)'); mgLineH.setAttribute('stroke-width', '0.75');
+        dimGroup.appendChild(mgLineH);
+        dimGroup.appendChild(makeArrow(mgX1, mgY, -1, 0));
+        dimGroup.appendChild(makeArrow(mgX2, mgY, 1, 0));
+        dimGroup.appendChild(dimText((mgX1 + mgX2) / 2, mgY - 5, margin.toFixed(0), false));
+      }
+
+      var mgY1 = 0, mgY2 = p1y - mHalfH, mgX = p1x;
+      if (mgY2 > mgY1 + 1) {
+        var mgLineV = document.createElementNS(SVGNS, 'line');
+        mgLineV.setAttribute('x1', mgX); mgLineV.setAttribute('y1', mgY1); mgLineV.setAttribute('x2', mgX); mgLineV.setAttribute('y2', mgY2);
+        mgLineV.setAttribute('stroke', 'var(--muted)'); mgLineV.setAttribute('stroke-width', '0.75');
+        dimGroup.appendChild(mgLineV);
+        dimGroup.appendChild(makeArrow(mgX, mgY1, 0, -1));
+        dimGroup.appendChild(makeArrow(mgX, mgY2, 0, 1));
+        dimGroup.appendChild(dimText(mgX + 10, (mgY1 + mgY2) / 2, margin.toFixed(0), false, 'start'));
+      }
+    }
+
+    // hole size leader
+    var edgeX = isDiaShape(shape) ? p1x + rpx * 0.7 : p1x + apx / 2;
+    var edgeY = isDiaShape(shape) ? p1y - rpx * 0.7 : p1y - bpx / 2;
+    var elbowX = edgeX + 16, elbowY = edgeY - 16;
+    var tailX = elbowX + 24;
+    dimGroup.appendChild(extLine(edgeX, edgeY, elbowX, elbowY));
+    dimGroup.appendChild(extLine(elbowX, elbowY, tailX, elbowY));
+    dimGroup.appendChild(dimText(tailX + 4, elbowY + 4, holeSizeLabel(g), false, 'start'));
+
+    plateGroup.appendChild(dimGroup);
+
+    renderDistanceSim(g);
+
+    saveSettings();
+  }
+
+  function downloadBlob(content, mime, filename){
+    var blob = new Blob([content], { type: mime });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+
+    // Browsers commonly block the `download` attribute when the page itself was opened by
+    // double-clicking the file (file:// origin) rather than served over http(s). In that case
+    // the click above silently does nothing, so proactively offer a fallback: open the raw
+    // content in a new tab, which the user can save manually with Ctrl/Cmd+S.
+    if (location.protocol === 'file:') {
+      setTimeout(function(){
+        var ok = confirm('ダウンロードが確認できませんでした（このページはローカルファイルを直接開いているため、ブラウザが自動ダウンロードをブロックした可能性があります）。\n\n「OK」をクリックすると新しいタブでファイルの内容を開きます。Ctrl/Cmd+S で「' + filename + '」として保存してください。\n\nすでに正常にダウンロードされている場合は「キャンセル」をクリックしてください。');
+        if (ok) {
+          var url2 = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
+          window.open(url2, '_blank');
+        }
+      }, 300);
+    }
+  }
+
+  function roundedRectPath(cx, cy, hw, hh, r){
+    var lines = [], arcs = [];
+    if (r <= 0.001) {
+      var pts = [[cx - hw, cy - hh], [cx + hw, cy - hh], [cx + hw, cy + hh], [cx - hw, cy + hh]];
+      for (var i = 0; i < 4; i++) lines.push([pts[i][0], pts[i][1], pts[(i + 1) % 4][0], pts[(i + 1) % 4][1]]);
+      return { lines: lines, arcs: arcs };
+    }
+    var NE = [cx + hw - r, cy + hh - r], NW = [cx - hw + r, cy + hh - r], SW = [cx - hw + r, cy - hh + r], SE = [cx + hw - r, cy - hh + r];
+    lines.push([cx + hw, cy - hh + r, cx + hw, cy + hh - r]);
+    arcs.push([NE[0], NE[1], r, 0, 90]);
+    lines.push([cx + hw - r, cy + hh, cx - hw + r, cy + hh]);
+    arcs.push([NW[0], NW[1], r, 90, 180]);
+    lines.push([cx - hw, cy + hh - r, cx - hw, cy - hh + r]);
+    arcs.push([SW[0], SW[1], r, 180, 270]);
+    lines.push([cx - hw + r, cy - hh, cx + hw - r, cy - hh]);
+    arcs.push([SE[0], SE[1], r, 270, 360]);
+    return { lines: lines, arcs: arcs };
+  }
+
+  function buildDXF(g, W, H, margin){
+    var holes = enumerateHoles(g, W, H, margin);
+    if (holes.length > HOLE_EXPORT_CAP) return null;
+    var e = [];
+    function line(x1, y1, x2, y2){ e.push('0\nLINE\n8\n0\n10\n' + x1 + '\n20\n' + y1 + '\n30\n0\n11\n' + x2 + '\n21\n' + y2 + '\n31\n0'); }
+    function dimLine(x1, y1, x2, y2){ e.push('0\nLINE\n8\nDIM\n10\n' + x1 + '\n20\n' + y1 + '\n30\n0\n11\n' + x2 + '\n21\n' + y2 + '\n31\n0'); }
+    function circle(cx, cy, r){ e.push('0\nCIRCLE\n8\n0\n10\n' + cx + '\n20\n' + cy + '\n30\n0\n40\n' + r); }
+    function arc(cx, cy, r, a1, a2){ e.push('0\nARC\n8\n0\n10\n' + cx + '\n20\n' + cy + '\n30\n0\n40\n' + r + '\n50\n' + a1 + '\n51\n' + a2); }
+    function text(x, y, h, str){ e.push('0\nTEXT\n8\nDIM\n10\n' + x + '\n20\n' + y + '\n30\n0\n40\n' + h + '\n1\n' + str); }
+    // Small V-shaped tick mark standing in for a dimension arrowhead — plain LINEs keep the
+    // whole export to LINE/CIRCLE/ARC/TEXT/POLYLINE, no DIMENSION/DIMSTYLE block required.
+    function tick(tipX, tipY, dx, dy){
+      var s = 1.2;
+      var backX = tipX - dx * s, backY = tipY - dy * s;
+      var px_ = -dy * s * 0.6, py_ = dx * s * 0.6;
+      dimLine(backX + px_, backY + py_, tipX, tipY);
+      dimLine(backX - px_, backY - py_, tipX, tipY);
+    }
+    // R12 has no ELLIPSE entity (that's R13+), so approximate with a closed POLYLINE —
+    // the standard R12-compatible way to represent a smooth closed curve.
+    function ellipsePolyline(cx, cy, ra, rb){
+      var SEG = 36, parts = ['0\nPOLYLINE\n8\n0\n66\n1\n70\n1'];
+      for (var i = 0; i < SEG; i++) {
+        var th = (i / SEG) * Math.PI * 2;
+        parts.push('0\nVERTEX\n8\n0\n10\n' + (cx + ra * Math.cos(th)) + '\n20\n' + (cy + rb * Math.sin(th)) + '\n30\n0');
+      }
+      parts.push('0\nSEQEND');
+      e.push(parts.join('\n'));
+    }
+    function dxfSizeLabel(g){
+      if (g.shape === 'round') return '%%C' + g.d.toFixed(0);
+      if (g.shape === 'triangle') return 'T' + g.d.toFixed(0);
+      if (g.shape === 'hex') return 'H' + g.d.toFixed(0);
+      if (g.shape === 'ellipse') return g.a.toFixed(0) + 'x' + g.b.toFixed(0);
+      return g.a.toFixed(0) + 'x' + g.b.toFixed(0) + ' R' + g.r.toFixed(0);
+    }
+
+    line(0, 0, W, 0); line(W, 0, W, H); line(W, H, 0, H); line(0, H, 0, 0);
+
+    holes.forEach(function(p){
+      if (g.shape === 'round') {
+        circle(p[0], p[1], g.d / 2);
+      } else if (g.shape === 'triangle' || g.shape === 'hex') {
+        var poly = regularPolygonPoints(p[0], p[1], g.d / 2, g.shape);
+        for (var vi = 0; vi < poly.length; vi++) {
+          var pA = poly[vi], pB = poly[(vi + 1) % poly.length];
+          line(pA[0], pA[1], pB[0], pB[1]);
+        }
+      } else if (g.shape === 'ellipse') {
+        ellipsePolyline(p[0], p[1], g.a / 2, g.b / 2);
+      } else {
+        var rr = roundedRectPath(p[0], p[1], g.a / 2, g.b / 2, g.r);
+        rr.lines.forEach(function(l){ line(l[0], l[1], l[2], l[3]); });
+        rr.arcs.forEach(function(a){ arc(a[0], a[1], a[2], a[3], a[4]); });
+      }
+    });
+
+    // --- dimension annotations, mirroring the on-screen leader/pitch/gap/margin dimensions,
+    // drawn in real mm and placed outside the plate's top-left corner (same layout as render()).
+    var TXT_H = 2.5, DIM_OFF = 8, EXT_GAP = 1.5;
+    var refs = firstHoleRefs(g, margin);
+    var p1x = refs.h1[0], p1y = refs.h1[1];
+    var p2x = refs.h2[0], p2y = refs.h2[1];
+    var p3x = refs.h3[0], p3y = refs.h3[1];
+
+    var hy = -DIM_OFF;
+    var hLo = Math.min(p1x, p2x), hHi = Math.max(p1x, p2x);
+    dimLine(p1x, p1y, p1x, hy - EXT_GAP);
+    dimLine(p2x, p2y, p2x, hy - EXT_GAP);
+    dimLine(hLo, hy, hHi, hy);
+    tick(hLo, hy, -1, 0); tick(hHi, hy, 1, 0);
+    text((hLo + hHi) / 2 - TXT_H, hy - EXT_GAP - TXT_H, TXT_H, refs.hDimVal.toFixed(0));
+
+    var vx = -DIM_OFF;
+    var vLo = Math.min(p1y, p3y), vHi = Math.max(p1y, p3y);
+    dimLine(p1x, p1y, vx - EXT_GAP, p1y);
+    dimLine(p3x, p3y, vx - EXT_GAP, p3y);
+    dimLine(vx, vLo, vx, vHi);
+    tick(vx, vLo, 0, -1); tick(vx, vHi, 0, 1);
+    text(vx - EXT_GAP - TXT_H * 3, (vLo + vHi) / 2, TXT_H, refs.vDimVal.toFixed(0));
+
+    var gapMM = g.Px - (isDiaShape(g.shape) ? g.d : g.a);
+    if (gapMM > 0.001) {
+      var gapHalf = isDiaShape(g.shape) ? g.d / 2 : g.a / 2;
+      var gapX1 = p1x + gapHalf, gapX2 = p2x - gapHalf, gapY = p1y;
+      dimLine(gapX1, gapY, gapX2, gapY);
+      tick(gapX1, gapY, -1, 0); tick(gapX2, gapY, 1, 0);
+      text((gapX1 + gapX2) / 2 - TXT_H, gapY - EXT_GAP, TXT_H, gapMM.toFixed(0));
+    }
+
+    if (margin > 0.001) {
+      var mHalfW = isDiaShape(g.shape) ? g.d / 2 : g.a / 2;
+      var mHalfH = isDiaShape(g.shape) ? g.d / 2 : g.b / 2;
+
+      var mgX1 = 0, mgX2 = p1x - mHalfW, mgY = p1y;
+      if (mgX2 > mgX1 + 1) {
+        dimLine(mgX1, mgY, mgX2, mgY);
+        tick(mgX1, mgY, -1, 0); tick(mgX2, mgY, 1, 0);
+        text((mgX1 + mgX2) / 2 - TXT_H, mgY - EXT_GAP, TXT_H, margin.toFixed(0));
+      }
+
+      var mgY1 = 0, mgY2 = p1y - mHalfH, mgX = p1x;
+      if (mgY2 > mgY1 + 1) {
+        dimLine(mgX, mgY1, mgX, mgY2);
+        tick(mgX, mgY1, 0, -1); tick(mgX, mgY2, 0, 1);
+        text(mgX + EXT_GAP, (mgY1 + mgY2) / 2, TXT_H, margin.toFixed(0));
+      }
+    }
+
+    var edgeX = isDiaShape(g.shape) ? p1x + (g.d / 2) * 0.7 : p1x + g.a / 2;
+    var edgeY = isDiaShape(g.shape) ? p1y - (g.d / 2) * 0.7 : p1y - g.b / 2;
+    var elbowX = edgeX + 5, elbowY = edgeY - 5;
+    var tailX = elbowX + 7;
+    dimLine(edgeX, edgeY, elbowX, elbowY);
+    dimLine(elbowX, elbowY, tailX, elbowY);
+    text(tailX + 1, elbowY + 1, TXT_H, dxfSizeLabel(g));
+
+    return '0\nSECTION\n2\nENTITIES\n' + e.join('\n') + '\n0\nENDSEC\n0\nEOF\n';
+  }
+
+  function buildCleanSVG(g, W, H, margin){
+    var holes = enumerateHoles(g, W, H, margin);
+    if (holes.length > HOLE_EXPORT_CAP) return null;
+    var parts = [];
+    parts.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + 'mm" height="' + H + 'mm">');
+    parts.push('<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="none" stroke="#000" stroke-width="0.2"/>');
+    holes.forEach(function(p){
+      if (g.shape === 'round') {
+        parts.push('<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (g.d / 2) + '" fill="none" stroke="#000" stroke-width="0.2"/>');
+      } else if (g.shape === 'triangle' || g.shape === 'hex') {
+        var poly = regularPolygonPoints(p[0], p[1], g.d / 2, g.shape);
+        parts.push('<polygon points="' + poly.map(function(pp){ return pp[0] + ',' + pp[1]; }).join(' ') + '" fill="none" stroke="#000" stroke-width="0.2"/>');
+      } else if (g.shape === 'ellipse') {
+        parts.push('<ellipse cx="' + p[0] + '" cy="' + p[1] + '" rx="' + (g.a / 2) + '" ry="' + (g.b / 2) + '" fill="none" stroke="#000" stroke-width="0.2"/>');
+      } else {
+        parts.push('<rect x="' + (p[0] - g.a / 2) + '" y="' + (p[1] - g.b / 2) + '" width="' + g.a + '" height="' + g.b + '" rx="' + g.r + '" ry="' + g.r + '" fill="none" stroke="#000" stroke-width="0.2"/>');
+      }
+    });
+    parts.push('</svg>');
+    return parts.join('\n');
+  }
+
+  function currentGW(){
+    var g = geometry();
+    var plateMM = getPlateMM();
+    return { g: g, W: plateMM.W, H: plateMM.H, margin: plateMM.margin };
+  }
+
+  el.exportSvg.addEventListener('click', function(){
+    var ctx = currentGW();
+    var svgText = buildCleanSVG(ctx.g, ctx.W, ctx.H, ctx.margin);
+    if (svgText == null) { alert('孔の数が多すぎます（' + HOLE_EXPORT_CAP.toLocaleString() + ' 個を超えています）。ベクターファイルを書き出せません。板サイズを小さくするかピッチを広げてから再試行してください。'); return; }
+    downloadBlob(svgText, 'image/svg+xml', 'punching-pattern.svg');
+  });
+
+  el.exportDxf.addEventListener('click', function(){
+    var ctx = currentGW();
+    var dxfText = buildDXF(ctx.g, ctx.W, ctx.H, ctx.margin);
+    if (dxfText == null) { alert('孔の数が多すぎます（' + HOLE_EXPORT_CAP.toLocaleString() + ' 個を超えています）。ベクターファイルを書き出せません。板サイズを小さくするかピッチを広げてから再試行してください。'); return; }
+    downloadBlob(dxfText, 'application/dxf', 'punching-pattern.dxf');
+  });
+
+  syncPair(el.dRange, el.dNum, render);
+  syncPair(el.aRange, el.aNum, render);
+  syncPair(el.bRange, el.bNum, render);
+  syncPair(el.rRange, el.rNum, render);
+  syncPair(el.pRange, el.pNum, render);
+  syncPair(el.pyRange, el.pyNum, render);
+  document.querySelectorAll('input[name="shape"]').forEach(function(r){ r.addEventListener('change', render); });
+  document.querySelectorAll('input[name="arrange"]').forEach(function(r){ r.addEventListener('change', render); });
+  el.pyToggle.addEventListener('change', render);
+  syncPair(el.marginRange, el.marginNum, render);
+  syncPair(el.calibRange, el.calibNum, function(){ saveCalib(); render(); });
+  el.calibReset.addEventListener('click', function(){ el.calibRange.value = 100; el.calibNum.value = 100; saveCalib(); render(); });
+  el.physCalRange.addEventListener('input', function(){ updateCalibBar(); savePhysCal(); render(); });
+  el.physCalReset.addEventListener('click', function(){ el.physCalRange.value = 1; updateCalibBar(); savePhysCal(); render(); });
+  syncPair(el.distRange, el.distNum, render);
+  syncPair(el.repeatRange, el.repeatNum, render);
+  window.addEventListener('resize', render);
+
+  loadSettings();
+  updateCalibBar();
+  render();
+})();
+</script>
+</body>
+</html>
