@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5ヶ月目課題｜自分専用の提案スキルを作る</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fbfbfa;--card:#fff;--ink:#1c1c1c;
+  --t2:rgba(20,20,20,.56);--t3:rgba(20,20,20,.36);
+  --line:rgba(20,20,20,.09);--line2:rgba(20,20,20,.15);
+  --accent:#2e76ab;--accent-bg:rgba(46,118,171,.08);
+  --green:#1a7a58;--green-bg:rgba(26,122,88,.09);
+  --red:#c0304a;--red-bg:rgba(192,48,74,.07);
+  --amber:#b06800;--amber-bg:rgba(176,104,0,.09);
+}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,"Hiragino Sans","Noto Sans JP",sans-serif;line-height:1.75;padding:40px 20px}
+.wrap{max-width:960px;margin:0 auto}
+
+/* header */
+.eyebrow{display:inline-block;background:var(--accent-bg);color:var(--accent);font-size:.7rem;font-weight:700;letter-spacing:.08em;padding:3px 12px;border-radius:20px;margin-bottom:14px}
+h1{font-size:clamp(1.5rem,4vw,2.1rem);font-weight:800;line-height:1.2;letter-spacing:-.02em;margin-bottom:10px}
+.lead{color:var(--t2);font-size:.95rem;max-width:58ch;margin-bottom:32px}
+.meta-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:48px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line2);border-radius:9px;padding:7px 12px;font-size:.8rem;font-weight:600}
+
+/* section */
+.sec{margin-bottom:52px}
+.sec-label{font-size:.72rem;font-weight:700;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:6px;margin-bottom:16px}
+.sec-label::before{content:'';display:inline-block;width:3px;height:14px;background:var(--accent);border-radius:2px}
+
+/* proposal target */
+.target-card{background:var(--card);border:1px solid var(--line2);border-radius:14px;padding:24px;display:flex;gap:20px;align-items:flex-start}
+.t-icon{font-size:2rem;flex-shrink:0}
+.t-body h3{font-size:1rem;font-weight:700;margin-bottom:6px}
+.t-body p{font-size:.88rem;color:var(--t2);line-height:1.7}
+.tag{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:10px;margin-top:8px}
+.tag-green{background:var(--green-bg);color:var(--green)}
+.tag-amber{background:var(--amber-bg);color:var(--amber)}
+
+/* before/after */
+.ba{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:start}
+@media(max-width:640px){.ba{grid-template-columns:1fr}.ba-arrow{display:none}}
+.ba-arrow{display:flex;align-items:center;justify-content:center;padding-top:32px;color:var(--t3);font-size:1.6rem}
+.proposal{border-radius:14px;padding:22px}
+.proposal.before{background:var(--red-bg);border:1px solid rgba(192,48,74,.18)}
+.proposal.after{background:var(--green-bg);border:1px solid rgba(26,122,88,.2)}
+.prop-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.prop-badge{font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:8px;letter-spacing:.06em}
+.before .prop-badge{background:rgba(192,48,74,.15);color:var(--red)}
+.after .prop-badge{background:rgba(26,122,88,.15);color:var(--green)}
+.prop-head h3{font-size:.88rem;font-weight:700}
+.prop-text{font-size:.83rem;line-height:1.85;color:var(--ink);white-space:pre-wrap}
+.prop-note{margin-top:12px;font-size:.75rem;color:var(--t2);border-top:1px solid var(--line2);padding-top:10px;font-style:italic}
+
+/* points */
+.points{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media(max-width:560px){.points{grid-template-columns:1fr}}
+.point{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.point.good{border-top:3px solid var(--green)}
+.point.bad{border-top:3px solid var(--amber)}
+.point-tag{font-size:.68rem;font-weight:700;letter-spacing:.05em;margin-bottom:8px}
+.good .point-tag{color:var(--green)}
+.bad .point-tag{color:var(--amber)}
+.point h3{font-size:.9rem;font-weight:700;margin-bottom:8px}
+.point p{font-size:.8rem;color:var(--t2);line-height:1.7}
+
+/* insight */
+.insight{background:linear-gradient(135deg,#f0f6fb 0%,#fff 100%);border:1px solid rgba(46,118,171,.2);border-radius:14px;padding:28px}
+.insight-quote{font-size:1.05rem;font-weight:700;line-height:1.65;color:var(--ink);margin-bottom:16px;position:relative;padding-left:16px;border-left:4px solid var(--accent)}
+.insight-sub{font-size:.82rem;color:var(--t2);line-height:1.75}
+.insight-sub li{margin-bottom:6px;padding-left:14px;position:relative}
+.insight-sub li::before{content:"→";position:absolute;left:0;color:var(--accent)}
+
+/* flow */
+.flow{display:flex;gap:0;border-radius:12px;overflow:hidden;box-shadow:0 1px 8px rgba(0,0,0,.07);margin-bottom:0}
+.flow-item{flex:1;background:var(--card);padding:16px 12px;text-align:center;position:relative;border-top:3px solid var(--accent)}
+.flow-item:nth-child(2){border-top-color:var(--amber)}
+.flow-item:nth-child(3){border-top-color:var(--green)}
+.flow-item:nth-child(4){border-top-color:#9b59b6}
+.flow-item:nth-child(5){border-top-color:var(--accent)}
+.flow-item:not(:last-child)::after{content:"→";position:absolute;right:-10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:1rem;z-index:1}
+.fi-step{font-size:.6rem;color:var(--t3);font-weight:700;letter-spacing:.05em;margin-bottom:3px}
+.fi-name{font-size:.75rem;font-weight:700;color:var(--ink)}
+.fi-sub{font-size:.65rem;color:var(--t2);margin-top:2px}
+
+footer{text-align:center;margin-top:52px;font-size:.75rem;color:var(--t3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ヘッダー -->
+  <span class="eyebrow">AI Driven School｜5ヶ月目課題</span>
+  <h1>自分専用の<br>提案スキルを作る</h1>
+  <p class="lead">配布された提案スキルを業務に合わせてチューニングし、AIによる一発出しで提案文を作る。手で直さず、渡すものを直す。</p>
+  <div class="meta-chips">
+    <span class="chip">👤 小野良介｜COLORFUL昱景設計</span>
+    <span class="chip">📚 第9回講義の課題</span>
+    <span class="chip">🚫 手作業の文章修正禁止</span>
+    <span class="chip">⚡ AIによる一発出し</span>
+  </div>
+
+  <!-- 1. 誰に何を提案したか -->
+  <div class="sec">
+    <div class="sec-label">想定した相手と変えたいこと</div>
+    <div class="target-card">
+      <div class="t-icon">🏢</div>
+      <div class="t-body">
+        <h3>事務所スタッフへ：出勤ルールをフレックス制に変更する提案</h3>
+        <p>現状は9:00〜9:15出勤、遅刻はカレンダー記録というルールを設けていたが、残業が常態化し記録ルールも機能していなかった。スタッフの心理的負担を減らすため、出勤時間のフレックス化と18:00以降の会議禁止を提案する。</p>
+        <span class="tag tag-amber">決定権：小野良介（オーナー）</span>
+        <span class="tag tag-green">相手の問い：なぜ今のルールを変えるのか</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. チューニング前後 -->
+  <div class="sec">
+    <div class="sec-label">チューニング前後の提案文</div>
+    <div class="ba">
+      <!-- Before -->
+      <div class="proposal before">
+        <div class="prop-head">
+          <span class="prop-badge">BEFORE</span>
+          <h3>配布スキルそのままの出力</h3>
+        </div>
+        <div class="prop-text">【提案】出勤時間をフレックス制（10:00まで）に変更します。
+
+現在、出勤は9:00〜9:15と定め、遅れる場合はカレンダーへの記録をお願いしていました。
+
+現状の課題
+残業が常態化しており、カレンダーへの記録ルールが十分に機能していない状況です。スタッフの心理的負担にもなっています。
+
+変更内容
+出勤時間を10:00までのフレックス制に変更します。カレンダーへの残業記録ルールは廃止します。
+
+目的
+働きやすい環境をつくり、スタッフの負担を軽減します。</div>
+        <div class="prop-note">結論はあるが根拠が薄い。「機能していない」と書いてあるが、なぜ機能しないのかが伝わらない。</div>
+      </div>
+
+      <div class="ba-arrow">→</div>
+
+      <!-- After -->
+      <div class="proposal after">
+        <div class="prop-head">
+          <span class="prop-badge">AFTER</span>
+          <h3>チューニング後・一発出し</h3>
+        </div>
+        <div class="prop-text">【提案】出勤・退社時間をフレックス制に変更します。あわせて、18:00以降の会議を原則禁止にします。
+
+正直に言います。カレンダーへの残業記録は、こちらから催促しないと書かれないことが続いていました。催促する側も、される側も、どちらにとっても消耗するやりとりでした。人はやらなくていいことは積極的にはやりません。それが現実で、このルールは機能していませんでした。
+
+変更内容
+・出勤：9:00〜10:00の間（フレックス、記録不要）
+・退社：出勤から8時間後
+  例：9:00出勤 → 18:00退社　10:00出勤 → 19:00退社
+・10:00以降の出勤：従来通りカレンダーへの記録をお願いします
+・18:00以降の会議：原則禁止
+  どうしても必要な場合はオンラインのみ、参加は任意
+
+これで変わること
+前日に遅くまで作業した翌朝、少し余裕をもって出勤できます。10:00までに出勤していれば、カレンダーへの記録は不要です。18:00以降に会議が入ることもなくなります。退社後の時間は、自分の時間です。
+
+タイムカードの導入はしません。管理のための管理を増やすことは、今の事務所に合わないと考えています。</div>
+        <div class="prop-note">「催促しないと書かれない」という具体的な事実と、「人はやりたくないことはやらない」という正直な観察が加わり、読んで心が動く文章になった。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. スキルの使い方フロー -->
+  <div class="sec">
+    <div class="sec-label">提案スキルの使い方</div>
+    <div class="flow">
+      <div class="flow-item">
+        <div class="fi-step">STEP 1</div>
+        <div class="fi-name">変えたいこと<br>を1つ決める</div>
+        <div class="fi-sub">人間が上流を決める</div>
+      </div>
+      <div class="flow-item">
+        <div class="fi-step">STEP 2</div>
+        <div class="fi-name">スキルそのまま<br>で試す</div>
+        <div class="fi-sub">Before出力を保存</div>
+      </div>
+      <div class="flow-item">
+        <div class="fi-step">STEP 3</div>
+        <div class="fi-name">模範回答を<br>作る</div>
+        <div class="fi-sub">具体的事実を追加</div>
+      </div>
+      <div class="flow-item">
+        <div class="fi-step">STEP 4</div>
+        <div class="fi-name">スキルを<br>チューニング</div>
+        <div class="fi-sub">渡すものを直す</div>
+      </div>
+      <div class="flow-item">
+        <div class="fi-step">STEP 5</div>
+        <div class="fi-name">一発出し<br>→そのまま提出</div>
+        <div class="fi-sub">手作業修正禁止</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 工夫・苦戦ポイント -->
+  <div class="sec">
+    <div class="sec-label">工夫したポイント・苦戦したポイント</div>
+    <div class="points">
+      <div class="point good">
+        <div class="point-tag">✅ 工夫したポイント</div>
+        <h3>渡す情報を「事実」に変えた</h3>
+        <p>最初は「何を変えたいか」だけを渡していた。そこに「催促しないと書かれない」という誰もが知っている場面と、「人はやりたくないことはやらない」という正直な観察を追加した。情報の質が変わると、出力の質が変わった。</p>
+      </div>
+      <div class="point good">
+        <div class="point-tag">✅ 工夫したポイント</div>
+        <h3>具体的な約束を数字で入れた</h3>
+        <p>「18時以降の会議は任意」「出勤から8時間後が退社」など、曖昧な表現を避けて具体的な数字と条件を盛り込んだ。読んだ相手が「結局どうなるの？」と聞き返さずに済む文章になった。</p>
+      </div>
+      <div class="point bad">
+        <div class="point-tag">⚠ 苦戦したポイント</div>
+        <h3>手で直したい衝動との戦い</h3>
+        <p>出力を読むと「ここだけ直したい」という衝動が何度も来た。ルールに従い、手は動かさずスキルの模範回答側を修正して再実行した。「渡すものを直す」という考え方が身につくまでに時間がかかった。</p>
+      </div>
+      <div class="point bad">
+        <div class="point-tag">⚠ 苦戦したポイント</div>
+        <h3>どこまでが「材料集め」かの線引き</h3>
+        <p>ルールでは「材料集めのやり取りはOK、出力した文章の修正はNG」とされていたが、その境界線が最初はわかりにくかった。最終的に「スキルに渡す情報を整える会話はOK、出てきた文章に手を加えるのはNG」と自分で基準を決めた。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 気づき -->
+  <div class="sec">
+    <div class="sec-label">提案スキルを使って気づいたこと</div>
+    <div class="insight">
+      <div class="insight-quote">「渡した情報が薄かった」——それだけだった。</div>
+      <ul class="insight-sub">
+        <li>最初の出力は悪くなかった。結論も先に言っているし、根拠もある。でも読んでも心が動かなかった。</li>
+        <li>AIに渡したのは「何を変えたいか」だけ。出てくるのは「説明」だった。</li>
+        <li>渡すものを変えた——誰もが知っている場面、正直な観察、具体的な約束——すると出力が変わった。</li>
+        <li>文章の質はAIの問題ではなく、自分が渡す材料の問題だった。</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>小野良介｜COLORFUL昱景設計｜AI Driven School 5ヶ月目課題｜2026年8月</footer>
+</div>
+</body>
+</html>
