@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自己紹介 — 小野良介 / COLORFUL昱景設計</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #fbfbfa;
+    --card: #ffffff;
+    --ink: #1c1c1c;
+    --muted: rgba(20,20,20,.56);
+    --light: rgba(20,20,20,.36);
+    --line: rgba(20,20,20,.1);
+    --line2: rgba(20,20,20,.16);
+    --accent: #2e76ab;
+    --accent-bg: rgba(46,118,171,.09);
+    --green: #1a7a58;
+    --green-bg: rgba(26,122,88,.1);
+    --amber: #b06800;
+    --amber-bg: rgba(176,104,0,.1);
+    --purple: #5b3cb4;
+    --purple-bg: rgba(91,60,180,.08);
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Segoe UI", sans-serif;
+    line-height: 1.7;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 22px; }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(150deg, #ffffff 0%, #eef4fb 100%);
+    border-bottom: 1px solid var(--line);
+    padding: 56px 0 48px;
+  }
+  .hero-inner { display: flex; align-items: center; gap: 32px; flex-wrap: wrap; }
+  .avatar {
+    width: 100px; height: 100px; border-radius: 18px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .hero-text { flex: 1; min-width: 200px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--accent); background: var(--accent-bg);
+    padding: 4px 10px; border-radius: 999px; margin-bottom: 10px;
+  }
+  .hero h1 { font-size: clamp(24px, 4vw, 38px); font-weight: 800; letter-spacing: -.02em; }
+  .hero h1 .en { font-size: .55em; font-weight: 500; color: var(--muted); margin-left: 8px; }
+  .hero-sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--card); border: 1px solid var(--line2);
+    border-radius: 999px; padding: 5px 12px;
+    font-size: 12px; font-weight: 600; color: var(--ink);
+  }
+
+  /* ── Sections ── */
+  section { padding: 44px 0; }
+  section + section { border-top: 1px solid var(--line); }
+  .sec-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 6px;
+  }
+  .sec-title { font-size: clamp(18px, 3vw, 24px); font-weight: 780; margin-bottom: 6px; }
+  .sec-desc { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+
+  /* ── Grid ── */
+  .grid { display: grid; gap: 14px; }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 600px) { .g2, .g3 { grid-template-columns: 1fr; } }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 20px;
+  }
+  .card-icon { font-size: 28px; margin-bottom: 10px; }
+  .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .card .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .mini-tag {
+    font-size: 11px; font-weight: 600; padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .mini-tag.blue { background: var(--accent-bg); color: var(--accent); }
+  .mini-tag.green { background: var(--green-bg); color: var(--green); }
+  .mini-tag.amber { background: var(--amber-bg); color: var(--amber); }
+  .mini-tag.purple { background: var(--purple-bg); color: var(--purple); }
+
+  /* ── Stat cards ── */
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+  @media (max-width: 600px) { .stat-grid { grid-template-columns: 1fr; } }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .stat-num { font-size: 28px; font-weight: 800; color: var(--accent); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--muted); }
+
+  /* ── Before / After ── */
+  .ba-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; }
+  @media (max-width: 600px) { .ba-grid { grid-template-columns: 1fr; } .ba-arrow { transform: rotate(90deg); } }
+  .ba-arrow { font-size: 28px; color: var(--accent); text-align: center; }
+  .ba-card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 18px;
+  }
+  .ba-card.before { border-top: 3px solid var(--amber); }
+  .ba-card.after  { border-top: 3px solid var(--green); }
+  .ba-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+  .ba-card.before .ba-label { color: var(--amber); }
+  .ba-card.after  .ba-label { color: var(--green); }
+  .ba-card ul { list-style: none; padding: 0; }
+  .ba-card ul li { font-size: 13px; color: var(--muted); padding: 4px 0; border-bottom: 1px solid var(--line); }
+  .ba-card ul li:last-child { border-bottom: none; }
+  .ba-card.before ul li::before { content: "⚠ "; color: var(--amber); font-size: 11px; }
+  .ba-card.after  ul li::before { content: "✓ "; color: var(--green); font-size: 11px; }
+
+  /* ── Timeline ── */
+  .timeline { position: relative; padding-left: 32px; }
+  .timeline::before { content: ""; position: absolute; left: 9px; top: 8px; bottom: 8px; width: 2px; background: var(--line2); }
+  .tl-item { position: relative; margin-bottom: 24px; }
+  .tl-item:last-child { margin-bottom: 0; }
+  .tl-dot {
+    position: absolute; left: -32px; top: 4px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); border: 3px solid var(--bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tl-dot.green { background: var(--green); }
+  .tl-dot.current { background: var(--accent); box-shadow: 0 0 0 4px var(--accent-bg); }
+  .tl-date { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: .06em; margin-bottom: 2px; }
+  .tl-title { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .tl-desc { font-size: 13px; color: var(--muted); }
+  .tl-now {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    background: var(--accent); color: #fff;
+    padding: 1px 7px; border-radius: 999px; margin-left: 8px; vertical-align: middle;
+  }
+
+  /* ── Quote / Vision ── */
+  .vision-block {
+    background: linear-gradient(135deg, var(--accent-bg) 0%, var(--purple-bg) 100%);
+    border: 1px solid rgba(46,118,171,.2);
+    border-radius: 18px; padding: 32px 36px;
+  }
+  .vision-block .vision-text {
+    font-size: clamp(16px, 2.5vw, 20px); font-weight: 700; line-height: 1.6;
+    color: var(--ink); margin-bottom: 16px;
+  }
+  .vision-block .vision-sub { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .river-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    color: var(--green); background: var(--green-bg);
+    padding: 4px 10px; border-radius: 999px; margin-bottom: 12px;
+  }
+
+  /* ── Footer ── */
+  footer { border-top: 1px solid var(--line); padding: 28px 0; text-align: center; }
+  footer p { font-size: 12px; color: var(--light); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="wrap">
+    <div class="hero-inner">
+      <div class="avatar">
+        <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Triangle set square -->
+          <polygon points="8,42 8,12 32,42" fill="rgba(255,255,255,0.15)" stroke="white" stroke-width="1.8" stroke-linejoin="round"/>
+          <!-- Inner right angle mark -->
+          <polyline points="8,36 14,36 14,42" fill="none" stroke="white" stroke-width="1.2" opacity="0.7"/>
+          <!-- Pencil body -->
+          <rect x="33" y="10" width="6" height="26" rx="1" transform="rotate(0 33 10)" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="1.5"/>
+          <!-- Pencil tip -->
+          <polygon points="33,36 39,36 36,44" fill="white" opacity="0.9"/>
+          <!-- Pencil eraser top -->
+          <rect x="33" y="8" width="6" height="4" rx="1" fill="white" opacity="0.5"/>
+          <!-- Pencil line detail -->
+          <line x1="35" y1="10" x2="35" y2="36" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="hero-text">
+        <div class="eyebrow">AI Driven School — 自己紹介</div>
+        <h1>小野 良介 <span class="en">Ryo Ono</span></h1>
+        <div class="hero-sub">建築設計士 / COLORFUL昱景設計 代表 — 福岡</div>
+        <div class="chips">
+          <span class="chip">🏗️ 建築・内装設計</span>
+          <span class="chip">🇨🇳 中国語圏クライアント専門</span>
+          <span class="chip">📐 概念方案〜施工一貫</span>
+          <span class="chip">🌊 河川再生 NPO 準備中</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 数字で見る仕事 -->
+<section>
+  <div class="wrap">
+    <div class="sec-label">At a Glance</div>
+    <div class="sec-title">数字で見る仕事</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">中国語圏クライアント対応<br>日中バイリンガル提案</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">一貫</div>
+        <div class="stat-label">概念方案から施工まで<br>プロジェクト全体を担当</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">福岡</div>
+        <div class="stat-label">拠点：福岡<br>中国語圏の建築設計事務所</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 仕事 -->
+<section>
+  <div class="wrap">
+    <div class="sec-label">My Work</div>
+    <div class="sec-title">私の仕事</div>
+    <div class="sec-desc">中国語圏のクライアントと共に、空間を作る</div>
+    <div class="grid g3">
+      <div class="card">
+        <div class="card-icon">✏️</div>
+        <h3>内装・空間設計</h3>
+        <p>飲食店・商業施設・住宅など、クライアントのビジョンを空間に落とし込む。</p>
+        <div class="tag-row"><span class="mini-tag blue">設計</span><span class="mini-tag amber">商業</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🈳</div>
+        <h3>中国語圏対応</h3>
+        <p>日本在住の中国語圏クライアントへの提案・コミュニケーションが専門。</p>
+        <div class="tag-row"><span class="mini-tag blue">日中バイリンガル</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📐</div>
+        <h3>概念方案〜施工</h3>
+        <p>コンセプト提案から施工図まで一貫して担当。プロジェクト全体を管理する。</p>
+        <div class="tag-row"><span class="mini-tag green">一貫管理</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Before / After -->
+<section>
+  <div class="wrap">
+    <div class="sec-label">Challenge → Goal</div>
+    <div class="sec-title">AIを使いたい理由</div>
+    <div class="sec-desc">手間のかかる「伝える作業」を仕組みに変えたい</div>
+    <div class="ba-grid">
+      <div class="ba-card before">
+        <div class="ba-label">Before — 今の課題</div>
+        <ul>
+          <li>提案書を毎回ゼロから書く</li>
+          <li>中国語・日本語の両方で資料を作る手間</li>
+          <li>プロジェクト進捗の報告が形骸化しがち</li>
+          <li>設計に集中する時間が減っている</li>
+        </ul>
+      </div>
+      <div class="ba-arrow">→</div>
+      <div class="ba-card after">
+        <div class="ba-label">After — 目指す姿</div>
+        <ul>
+          <li>概念方案を型化・一発生成</li>
+          <li>図解で認知コストを下げる</li>
+          <li>報告ツールを自動化・自分専用化</li>
+          <li>設計クリエイティブに時間を使える</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AIDでやること -->
+<section>
+  <div class="wrap">
+    <div class="sec-label">AI Driven School</div>
+    <div class="sec-title">スクールで作りたいもの</div>
+    <div class="sec-desc">6ヶ月で「自分専用の武器」を育てる</div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot current"></div>
+        <div class="tl-date">1ヶ月目</div>
+        <div class="tl-title">パーソナル図解スキル <span class="tl-now">今ここ</span></div>
+        <div class="tl-desc">情報を一目でわかる図解に変換するスキルを作る</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-date">2ヶ月目</div>
+        <div class="tl-title">自動報告ツール</div>
+        <div class="tl-desc">進捗報告を自動化・ダッシュボード化する</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-date">3〜5ヶ月目</div>
+        <div class="tl-title">自分専用のツール群</div>
+        <div class="tl-desc">ワークスペース・文書作成・概念方案スキルを順番に構築する</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot green"></div>
+        <div class="tl-date">6ヶ月目・最終ゴール</div>
+        <div class="tl-title">AIが動く事務所をつくる</div>
+        <div class="tl-desc">設計以外の作業をAIに任せ、クリエイティブと River Walk に集中する</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Vision -->
+<section>
+  <div class="wrap">
+    <div class="sec-label">Vision</div>
+    <div class="vision-block">
+      <div class="river-badge">🌊 River Walk Project</div>
+      <div class="vision-text">
+        「設計以外の時間を、AIに渡す。<br>
+        そうして生まれた時間で、もっと大切なものを作りたい。」
+      </div>
+      <div class="vision-sub">
+        河川再生 NPO「River Walk」— 金屑川・室見川（福岡）の自然再生に取り組む構想。<br>
+        50歳からの人生をかけた、もうひとつのプロジェクトが動き始めている。<br>
+        AI Driven School での学びが、この夢を前に進める。
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>AI Driven School 1ヶ月目課題 — パーソナル図解スキル / 自己紹介図解 — 小野良介, 2026</p>
+  </div>
+</footer>
+
+</body>
+</html>
